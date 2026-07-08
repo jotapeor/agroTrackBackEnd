@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FrotaBackEndApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(FrotaBackEndApplication.class, args);
+
     }
 
 }
