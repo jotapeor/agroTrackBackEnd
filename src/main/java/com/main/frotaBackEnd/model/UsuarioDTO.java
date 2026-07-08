@@ -1,27 +1,25 @@
 package com.main.frotaBackEnd.model;
 
-import java.sql.Date;
-
-public class UserDTO {
+public class UsuarioDTO {
     private Long id_usuario;
-    public String nome;
-    public String email;
-    public String senha;
-    public String perfil;
-    public boolean ativo;
-    public Date data_criacao;
+    private String nome;
+    private String email;
+    private String senha;
+    private String perfil;
+    private boolean ativo;
+    private boolean primeiro_acesso = true;
 
-    public UserDTO() {
+    public UsuarioDTO() {
     }
 
-    public UserDTO(Long id_usuario, String nome, String email, String senha, String perfil, boolean ativo, Date data_criacao) {
+    public UsuarioDTO(Long id_usuario, String nome, String email, String senha, String perfil, boolean ativo, boolean primeiro_acesso) {
         this.id_usuario = id_usuario;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
         this.perfil = perfil;
         this.ativo = ativo;
-        this.data_criacao = data_criacao;
+        this.primeiro_acesso = primeiro_acesso;
     }
 
     public Long getId_usuario() {
@@ -72,11 +70,11 @@ public class UserDTO {
         this.ativo = ativo;
     }
 
-    public Date getData_criacao() {
-        return data_criacao;
+    public boolean isPrimeiro_acesso() {
+        return primeiro_acesso;
     }
 
-    public void setData_criacao(Date data_criacao) {
-        this.data_criacao = data_criacao;
+    public void setPrimeiro_acesso(boolean primeiro_acesso) {
+        this.primeiro_acesso = primeiro_acesso;
     }
 }

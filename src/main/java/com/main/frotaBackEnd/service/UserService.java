@@ -1,7 +1,6 @@
 package com.main.frotaBackEnd.service;
 
-import com.main.frotaBackEnd.model.UserDTO;
-import com.main.frotaBackEnd.model.UserRequestDTO;
+import com.main.frotaBackEnd.model.Usuario;
 import com.main.frotaBackEnd.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -12,25 +11,26 @@ import org.springframework.web.server.ResponseStatusException;
 public class UserService {
     @Autowired
     private UserRepository repository;
-
     @Autowired
     private TokenService tokenService;
 
-    public String logar(UserRequestDTO user) {
-        String message = "";
-        if (user.getEmail().isEmpty()) {
-            message = "E-mail não preenchido";
-        } else if (user.getSenha().isEmpty()) {
-            message = "Senha não preenchida";
+    public String logar(String email, String senha) {
+        if (email == null || email.isBlank())
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "E-mail não preenchido");
+        if (senha == null || senha.isBlank())
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Senha não preenchida");
+        Usuario user = repository.login(email, senha);
+        if (user == null) throw new ResponseStatusException(HttpStatusCode.valueOf(401), "E-mail ou senha incorretos.");
+        return tokenService.gerarToken(user);
+    }
+
+    public boolean emailExiste(String email) {
+        return repository.emailExiste(email);
+    }
+
+    public void alterarSenha(Long idUsuario, String novaSenha) {
+        if (repository.alterarSenha(novaSenha, idUsuario) == 0) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Usuário não encontrado.");
         }
-        if (!message.isEmpty()) {
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400), message);
-        }
-        UserDTO loggedData = repository.login(user.getEmail(), user.getSenha());
-        if (loggedData == null || loggedData.getId_usuario() == null) {
-            // O repositório retorna objeto sem ID quando as credenciais não batem; lançamos 401
-            throw new ResponseStatusException(HttpStatusCode.valueOf(401), "E-mail ou senha incorretos.");
-        }
-        return tokenService.gerarToken(loggedData); // Gera e retorna o token JWT assinado
     }
 }
