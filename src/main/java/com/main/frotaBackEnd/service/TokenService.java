@@ -37,7 +37,7 @@ public class TokenService {
                 .claim("perfil", user.getPerfil())
                 .claim("primeiro_acesso", user.isPrimeiro_acesso())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 3_000_000))
+                .expiration(new Date(System.currentTimeMillis() + 86_400_000))
                 .signWith(getSignKey())
                 .compact();
     }
@@ -58,7 +58,7 @@ public class TokenService {
 
     public boolean validarToken(String token) {
         try {
-            Jwts.parser().setSigningKey(getSignKey()).build().parseClaimsJws(token);
+            Jwts.parser().verifyWith(getSignKey()).build().parseSignedClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
