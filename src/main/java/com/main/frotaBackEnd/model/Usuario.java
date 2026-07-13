@@ -1,8 +1,11 @@
 package com.main.frotaBackEnd.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "usuario")
@@ -14,15 +17,28 @@ public class Usuario {
 
     private String nome;
     private String email;
+
+    @JsonIgnore
     private String senha;
+
     private String perfil;
     private boolean ativo;
 
     @Column(name = "primeiro_acesso")
     private boolean primeiro_acesso = true;
 
+    @Column(name = "foto_path")
+    private String foto_path;
+
     @Column(name = "data_criacao")
     private Date data_criacao;
+
+    @JsonIgnore
+    @ManyToMany
+    @JoinTable(name = "usuario_maquina",
+            joinColumns = @JoinColumn(name = "id_usuario"),
+            inverseJoinColumns = @JoinColumn(name = "id_maquina"))
+    private List<Maquina> maquinas = new ArrayList<>();
 
     public Usuario() {
     }
@@ -100,5 +116,21 @@ public class Usuario {
 
     public void setPrimeiro_acesso(boolean primeiro_acesso) {
         this.primeiro_acesso = primeiro_acesso;
+    }
+
+    public String getFoto_path() {
+        return foto_path;
+    }
+
+    public void setFoto_path(String foto_path) {
+        this.foto_path = foto_path;
+    }
+
+    public List<Maquina> getMaquinas() {
+        return maquinas;
+    }
+
+    public void setMaquinas(List<Maquina> maquinas) {
+        this.maquinas = maquinas;
     }
 }

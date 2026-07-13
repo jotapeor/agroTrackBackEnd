@@ -51,6 +51,63 @@ INSERT INTO `abastecimento` VALUES (1,1,2,'2026-06-20 06:45:00',150.00,'Diesel S
 UNLOCK TABLES;
 
 --
+-- Table structure for table `fazenda`
+--
+
+DROP TABLE IF EXISTS `fazenda`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fazenda` (
+  `id_fazenda` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(150) NOT NULL,
+  `localizacao` varchar(255) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `data_cadastro` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_fazenda`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fazenda`
+--
+
+LOCK TABLES `fazenda` WRITE;
+/*!40000 ALTER TABLE `fazenda` DISABLE KEYS */;
+INSERT INTO `fazenda` VALUES (1,'Fazenda Boa Esperança','Rodovia BR-364, Km 120, Zona Rural',1,'2026-07-01 08:00:00'),(2,'Fazenda Santa Fé','Estrada Municipal 456, Lote 12',1,'2026-07-01 08:00:00'),(3,'Fazenda Nossa Senhora Aparecida','Rodovia SP-225, Km 45, Zona Rural',1,'2026-07-01 08:05:00');
+/*!40000 ALTER TABLE `fazenda` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `talhao`
+--
+
+DROP TABLE IF EXISTS `talhao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `talhao` (
+  `id_talhao` int NOT NULL AUTO_INCREMENT,
+  `id_fazenda` int NOT NULL,
+  `nome` varchar(100) NOT NULL,
+  `area_hectares` decimal(10,2) DEFAULT NULL,
+  `cultura_atual` varchar(100) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id_talhao`),
+  KEY `id_fazenda` (`id_fazenda`),
+  CONSTRAINT `talhao_ibfk_1` FOREIGN KEY (`id_fazenda`) REFERENCES `fazenda` (`id_fazenda`) ON DELETE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `talhao`
+--
+
+LOCK TABLES `talhao` WRITE;
+/*!40000 ALTER TABLE `talhao` DISABLE KEYS */;
+INSERT INTO `talhao` VALUES (1,1,'Talhão 1 - Soja',45.00,'Soja',1),(2,1,'Talhão 2 - Milho',32.50,'Milho',1),(3,1,'Talhão 3 - Pastagem',28.00,'Pastagem',1),(4,2,'Talhão Norte',50.00,'Soja',1),(5,2,'Talhão Sul',38.00,'Milho',1),(6,3,'Talhão Leste',22.00,'Café',1),(7,3,'Talhão Oeste',30.00,'Cana-de-Açúcar',1);
+/*!40000 ALTER TABLE `talhao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `maquina`
 --
 
@@ -59,16 +116,33 @@ DROP TABLE IF EXISTS `maquina`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `maquina` (
   `id_maquina` int NOT NULL AUTO_INCREMENT,
+  `id_fazenda` int DEFAULT NULL,
+  `id_talhao` int DEFAULT NULL,
+  `nome` varchar(100) NOT NULL,
+  `tipo` enum('Trator','Colheitadeira','Pulverizador') NOT NULL,
+  `marca` varchar(100) DEFAULT NULL,
   `modelo` varchar(100) NOT NULL,
   `ano` int NOT NULL,
-  `tipo` varchar(50) NOT NULL,
-  `hodometro` decimal(10,2) NOT NULL DEFAULT '0.00',
-  `intervalo_manut_km` decimal(10,2) NOT NULL,
+  `numero_serie` varchar(100) DEFAULT NULL,
+  `placa` varchar(20) DEFAULT NULL,
+  `hodometro_inicial` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `capacidade_tanque` decimal(10,2) DEFAULT NULL,
+  `tipo_combustivel` varchar(50) DEFAULT NULL,
+  `intervalo_troca_oleo_horas` int DEFAULT NULL,
+  `intervalo_inspecao_horas` int DEFAULT NULL,
+  `consumo_medio` decimal(5,2) DEFAULT NULL,
   `status` enum('Disponivel','Em Operacao','Em Manutencao','Inativa') DEFAULT 'Disponivel',
   `nivel_risco` enum('Baixo','Medio','Alto') DEFAULT 'Baixo',
-  `consumo_medio` decimal(5,2) DEFAULT '0.00',
+  `data_aquisicao` date DEFAULT NULL,
+  `valor_aquisicao` decimal(12,2) DEFAULT NULL,
+  `foto_path` varchar(255) DEFAULT NULL,
+  `observacoes` text,
   `data_cadastro` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_maquina`)
+  PRIMARY KEY (`id_maquina`),
+  KEY `id_fazenda` (`id_fazenda`),
+  KEY `id_talhao` (`id_talhao`),
+  CONSTRAINT `maquina_ibfk_1` FOREIGN KEY (`id_fazenda`) REFERENCES `fazenda` (`id_fazenda`) ON DELETE SET NULL,
+  CONSTRAINT `maquina_ibfk_2` FOREIGN KEY (`id_talhao`) REFERENCES `talhao` (`id_talhao`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -78,7 +152,7 @@ CREATE TABLE `maquina` (
 
 LOCK TABLES `maquina` WRITE;
 /*!40000 ALTER TABLE `maquina` DISABLE KEYS */;
-INSERT INTO `maquina` VALUES (1,'Trator John Deere 6100J',2021,'Trator',1250.50,500.00,'Disponivel','Baixo',12.50,'2026-06-23 13:45:24'),(2,'Colheitadeira Case IH 250',2023,'Colheitadeira',450.00,300.00,'Em Operacao','Medio',35.00,'2026-06-23 13:45:24'),(3,'Pulverizador Jacto Uniport 3030',2020,'Pulverizador',3200.80,400.00,'Em Manutencao','Alto',18.20,'2026-06-23 13:45:24'),(4,'Trator Massey Ferguson 4275',2022,'Trator',890.30,500.00,'Disponivel','Baixo',13.80,'2026-06-24 09:00:00'),(5,'Colheitadeira New Holland CR6.90',2024,'Colheitadeira',120.00,300.00,'Em Operacao','Medio',40.50,'2026-06-24 09:05:00'),(6,'Pulverizador Stara Imperador 3.0',2021,'Pulverizador',2100.60,400.00,'Disponivel','Baixo',17.90,'2026-06-24 09:10:00');
+INSERT INTO `maquina` VALUES (1,1,1,'Trator 01 - John Deere','Trator','John Deere','6100J',2021,'9YZ1234XG1234567','ABC-1234',1250.50,250.00,'Diesel S10',250,500,12.50,'Disponivel','Baixo','2020-01-15',320000.00,NULL,'Trator principal para preparo de solo.','2026-06-23 13:45:24'),(2,1,2,'Colheitadeira Case IH','Colheitadeira','Case IH','250 Series',2023,'H8T5678AB9012345','DEF-5678',450.00,400.00,'Diesel S500',200,300,35.00,'Em Operacao','Medio','2023-03-10',890000.00,NULL,'Colheitadeira de alta capacidade para grãos.','2026-06-23 13:45:24'),(3,2,4,'Pulverizador Jacto 3030','Pulverizador','Jacto','Uniport 3030',2020,'P3X9012CD3456789',NULL,3200.80,300.00,'Diesel S10',250,400,18.20,'Em Manutencao','Alto','2020-06-20',450000.00,NULL,'Apresentou falha na bomba hidráulica.','2026-06-23 13:45:24'),(4,2,5,'Trator MF 4275','Trator','Massey Ferguson','4275',2022,'M4F3456EF7890123','GHI-9012',890.30,250.00,'Diesel S10',250,500,13.80,'Disponivel','Baixo','2022-02-10',280000.00,NULL,'Utilizado em operações de plantio direto.','2026-06-24 09:00:00'),(5,3,6,'Colheitadeira NH CR6.90','Colheitadeira','New Holland','CR6.90',2024,'N5H7890GH1234567','JKL-3456',120.00,450.00,'Diesel S500',200,300,40.50,'Em Operacao','Medio','2024-01-05',950000.00,NULL,'Colheitadeira nova para a safra de café.','2026-06-24 09:05:00'),(6,3,7,'Pulverizador Stara','Pulverizador','Stara','Imperador 3.0',2021,'S6T1234IJ5678901',NULL,2100.60,350.00,'Diesel S10',250,400,17.90,'Disponivel','Baixo','2021-05-15',520000.00,NULL,'Pulverizador para aplicação de defensivos.','2026-06-24 09:10:00');
 /*!40000 ALTER TABLE `maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -200,6 +274,7 @@ CREATE TABLE `usuario` (
   `perfil` enum('PROPRIETARIO','OPERADOR') NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `primeiro_acesso` tinyint(1) DEFAULT '1',
+  `foto_path` varchar(255) DEFAULT NULL,
   `data_criacao` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `email` (`email`)
@@ -212,7 +287,13 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,'João Batista','joao.batista@fazenda.com.br','123456','PROPRIETARIO',1,0,'2026-06-23 13:45:21'),(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','123456','OPERADOR',1,0,'2026-06-23 13:45:21'),(3,'Marcos Silva','marcos.silva@fazenda.com.br','123456','OPERADOR',1,1,'2026-06-23 13:45:21'),(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','123456','OPERADOR',1,1,'2026-06-24 08:10:00'),(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','123456','OPERADOR',1,0,'2026-06-24 08:15:00'),(6,'Patrícia Souza','patricia.souza@fazenda.com.br','123456','PROPRIETARIO',1,1,'2026-06-24 08:20:00');
+INSERT INTO `usuario` (`id_usuario`, `nome`, `email`, `senha`, `perfil`, `ativo`, `primeiro_acesso`, `foto_path`, `data_criacao`) VALUES
+(1,'João Batista','joao.batista@fazenda.com.br','123456','PROPRIETARIO',1,0,NULL,'2026-06-23 13:45:21'),
+(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','123456','OPERADOR',1,0,NULL,'2026-06-23 13:45:21'),
+(3,'Marcos Silva','marcos.silva@fazenda.com.br','123456','OPERADOR',1,1,NULL,'2026-06-23 13:45:21'),
+(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','123456','OPERADOR',1,1,NULL,'2026-06-24 08:10:00'),
+(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','123456','OPERADOR',1,0,NULL,'2026-06-24 08:15:00'),
+(6,'Patrícia Souza','patricia.souza@fazenda.com.br','123456','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 

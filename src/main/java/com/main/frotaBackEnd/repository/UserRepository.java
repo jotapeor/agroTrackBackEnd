@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
     @Query("select count(u) > 0 from Usuario u where u.email = ?1")
     boolean emailExiste(String email);
 
+    Usuario findByEmail(String email);
+
     @Modifying
     @Transactional
     @Query("update Usuario u set u.senha = ?1, u.primeiro_acesso = false where u.id_usuario = ?2")
