@@ -50,6 +50,10 @@ public class MaquinaController {
         return solicitante;
     }
 
+    private boolean isProprietarioOuSocio(UsuarioDTO user) {
+        return "PROPRIETARIO".equals(user.getPerfil()) || "SOCIO".equals(user.getPerfil());
+    }
+
     @PostMapping
     public ResponseEntity<Map<String, String>> cadastrar(
             @RequestParam("nome") String nome,
@@ -118,7 +122,7 @@ public class MaquinaController {
     @GetMapping
     public ResponseEntity<List<MaquinaDTO>> listar(@RequestHeader("Authorization") String authHeader) {
         UsuarioDTO user = validarToken(authHeader);
-        if ("PROPRIETARIO".equals(user.getPerfil())) {
+        if (isProprietarioOuSocio(user)) {
             return ResponseEntity.ok(maquinaService.listarTodas());
         }
         return ResponseEntity.ok(maquinaService.listarPorUsuario(user.getId_usuario()));

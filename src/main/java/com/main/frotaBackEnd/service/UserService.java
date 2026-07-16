@@ -21,6 +21,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Senha não preenchida");
         Usuario user = repository.login(email, senha);
         if (user == null) throw new ResponseStatusException(HttpStatusCode.valueOf(401), "E-mail ou senha incorretos.");
+        if (!user.isAtivo()) throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Sua conta foi inativada. Entre em contato com o proprietário para reativá-la.");
         return tokenService.gerarToken(user);
     }
 
