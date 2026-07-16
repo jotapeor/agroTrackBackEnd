@@ -1,5 +1,6 @@
 package com.main.frotaBackEnd.controller;
 
+import com.main.frotaBackEnd.model.PerfilUsuario;
 import com.main.frotaBackEnd.model.Usuario;
 import com.main.frotaBackEnd.model.UsuarioDTO;
 import com.main.frotaBackEnd.repository.UserRepository;
@@ -32,7 +33,19 @@ public class ProprietarioController {
         if (!tokenService.validarToken(token))
             throw new ResponseStatusException(HttpStatusCode.valueOf(401), "Token inválido ou expirado.");
         UsuarioDTO solicitante = tokenService.extrairClaim(token);
-        if (!"PROPRIETARIO".equals(solicitante.getPerfil()))
+        if (!PerfilUsuario.PROPRIETARIO.equals(solicitante.getPerfil()))
+            throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Acesso negado.");
+        return solicitante;
+    }
+
+    private UsuarioDTO validarProprietarioOuSocio(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            throw new ResponseStatusException(HttpStatusCode.valueOf(401), "Token ausente.");
+        String token = authHeader.replace("Bearer ", "");
+        if (!tokenService.validarToken(token))
+            throw new ResponseStatusException(HttpStatusCode.valueOf(401), "Token inválido ou expirado.");
+        UsuarioDTO solicitante = tokenService.extrairClaim(token);
+        if (!PerfilUsuario.PROPRIETARIO.equals(solicitante.getPerfil()) && !PerfilUsuario.SOCIO.equals(solicitante.getPerfil()))
             throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Acesso negado.");
         return solicitante;
     }
@@ -52,13 +65,13 @@ public class ProprietarioController {
 
     @GetMapping("/colaboradores")
     public ResponseEntity<List<Usuario>> listarColaboradores(@RequestHeader("Authorization") String authHeader) {
-        validarProprietario(authHeader);
+        validarProprietarioOuSocio(authHeader);
         return ResponseEntity.ok(userRepository.findAll());
     }
 
     @GetMapping("/colaboradores/{id}")
     public ResponseEntity<Usuario> buscarColaborador(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
-        validarProprietario(authHeader);
+        validarProprietarioOuSocio(authHeader);
         Usuario user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Colaborador não encontrado."));
         return ResponseEntity.ok(user);
@@ -69,8 +82,8 @@ public class ProprietarioController {
             @PathVariable Long id,
             @RequestBody Map<String, String> dados,
             @RequestHeader("Authorization") String authHeader) {
-        validarProprietario(authHeader);
-        proprietarioService.atualizarColaborador(id, dados);
+        UsuarioDTO solicitante = validarProprietarioOuSocio(authHeader);
+        proprietarioService.atualizarColaborador(id, dados, solicitante);
         return ResponseEntity.ok(Map.of("message", "Colaborador atualizado com sucesso!"));
     }
 
@@ -79,8 +92,8 @@ public class ProprietarioController {
             @PathVariable Long id,
             @RequestBody List<Long> idsMaquinas,
             @RequestHeader("Authorization") String authHeader) {
-        validarProprietario(authHeader);
-        proprietarioService.vincularMaquinas(id, idsMaquinas);
+        UsuarioDTO solicitante = validarProprietarioOuSocio(authHeader);
+        proprietarioService.vincularMaquinas(id, idsMaquinas, solicitante);
         return ResponseEntity.ok(Map.of("message", "Vínculos atualizados com sucesso!"));
     }
 
@@ -88,7 +101,16 @@ public class ProprietarioController {
     public ResponseEntity<List<Long>> listarMaquinasVinculadas(
             @PathVariable Long id,
             @RequestHeader("Authorization") String authHeader) {
-        validarProprietario(authHeader);
+        validarProprietarioOuSocio(authHeader);
         return ResponseEntity.ok(proprietarioService.listarIdsMaquinasVinculadas(id));
+    }
+
+    @DeleteMapping("/colaboradores/{id}")
+    public ResponseEntity<Map<String, String>> excluirColaborador(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+        validarProprietario(authHeader);
+        proprietarioService.excluirColaborador(id);
+        return ResponseEntity.ok(Map.of("message", "Colaborador excluído com sucesso!"));
     }
 }

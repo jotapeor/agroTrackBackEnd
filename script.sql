@@ -271,14 +271,14 @@ CREATE TABLE `usuario` (
   `nome` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `senha` varchar(255) NOT NULL,
-  `perfil` enum('PROPRIETARIO','OPERADOR') NOT NULL,
+  `perfil` enum('PROPRIETARIO','SOCIO','OPERADOR') NOT NULL,
   `ativo` tinyint(1) DEFAULT '1',
   `primeiro_acesso` tinyint(1) DEFAULT '1',
   `foto_path` varchar(255) DEFAULT NULL,
   `data_criacao` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -293,7 +293,8 @@ INSERT INTO `usuario` (`id_usuario`, `nome`, `email`, `senha`, `perfil`, `ativo`
 (3,'Marcos Silva','marcos.silva@fazenda.com.br','123456','OPERADOR',1,1,NULL,'2026-06-23 13:45:21'),
 (4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','123456','OPERADOR',1,1,NULL,'2026-06-24 08:10:00'),
 (5,'Ricardo Alves','ricardo.alves@fazenda.com.br','123456','OPERADOR',1,0,NULL,'2026-06-24 08:15:00'),
-(6,'Patrícia Souza','patricia.souza@fazenda.com.br','123456','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00');
+(6,'Patrícia Souza','patricia.souza@fazenda.com.br','123456','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00'),
+(7,'Roberto Lima','roberto.lima@fazenda.com.br','123456','SOCIO',1,1,NULL,'2026-07-16 10:00:00');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
