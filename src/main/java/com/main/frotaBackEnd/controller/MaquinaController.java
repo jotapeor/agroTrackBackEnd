@@ -38,7 +38,11 @@ public class MaquinaController {
     @Autowired
     private com.main.frotaBackEnd.repository.MaquinaRepository maquinaRepository;
 
-    // Removed validarToken, validarProprietario, and isProprietarioOuSocio
+    @Autowired
+    private com.main.frotaBackEnd.repository.UserRepository userRepository;
+
+    @Autowired
+    private com.main.frotaBackEnd.service.HistoricoMaquinaService historicoMaquinaService;
 
     @PreAuthorize("hasRole('PROPRIETARIO')")
     @PostMapping
@@ -186,7 +190,7 @@ public class MaquinaController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> excluir(@PathVariable Long id) {
         maquinaService.excluir(id);
-        return ResponseEntity.ok(Map.of("message", "Máquina excluída com sucesso!"));
+        return ResponseEntity.ok(Map.of("message", "Máquina arquivada com sucesso!"));
     }
 
     @GetMapping("/fazendas")
@@ -213,16 +217,30 @@ public class MaquinaController {
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A justificativa é obrigatória.");
         }
 
-        com.main.frotaBackEnd.model.Maquina maquina = maquinaRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
-        
-        if (!"Alto".equals(maquina.getNivelRisco())) {
-             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A máquina não está em nível de risco Alto.");
-        }
-        
-        maquina.setAutorizadaOperacaoRisco(true);
-        maquinaRepository.save(maquina);
+        UsuarioDTO usuario = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        maquinaService.autorizarRisco(id, dto.getJustificativa(), usuario.getId_usuario());
 
         return ResponseEntity.ok(Map.of("message", "Operação temporária autorizada com sucesso."));
+    }
+
+    @PreAuthorize("hasAnyRole('PROPRIETARIO', 'SOCIO', 'OPERADOR')")
+    @GetMapping("/{idMaquina}/historico-completo")
+    public ResponseEntity<List<com.main.frotaBackEnd.model.HistoricoEventoDTO>> obterHistoricoCompleto(
+            @PathVariable Long idMaquina,
+            @RequestHeader("Authorization") String tokenHeader) {
+
+        UsuarioDTO userDTO = tokenService.extrairClaim(tokenHeader.substring(7));
+        Long idUsuario = userDTO.getId_usuario();
+        String role = userDTO.getPerfil();
+
+        if ("OPERADOR".equals(role)) {
+            boolean vinculado = userRepository.verificaVinculo(idUsuario, idMaquina);
+            if (!vinculado) {
+                throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Máquina não vinculada ao operador");
+            }
+        }
+
+        List<com.main.frotaBackEnd.model.HistoricoEventoDTO> historico = historicoMaquinaService.obterHistoricoCompleto(idMaquina);
+        return ResponseEntity.ok(historico);
     }
 }

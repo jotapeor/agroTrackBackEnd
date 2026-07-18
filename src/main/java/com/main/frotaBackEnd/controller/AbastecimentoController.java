@@ -23,8 +23,6 @@ public class AbastecimentoController {
     @Autowired
     private TokenService tokenService;
 
-    // Removed validarToken
-
     @PostMapping("/maquina/{idMaquina}")
     public ResponseEntity<?> registrarAbastecimento(
             @PathVariable Long idMaquina,
@@ -32,7 +30,7 @@ public class AbastecimentoController {
 
         UsuarioDTO usuario = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Abastecimento abastecimento = abastecimentoService.registrarAbastecimento(idMaquina, dto, usuario.getId_usuario(), usuario.getPerfil());
-        
+
         return ResponseEntity.ok(Map.of(
             "message", "Abastecimento registrado com sucesso.",
             "id_abastecimento", abastecimento.getId()

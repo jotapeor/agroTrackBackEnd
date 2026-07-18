@@ -27,8 +27,6 @@ public class ProprietarioController {
     @Autowired
     private UserRepository userRepository;
 
-    // Removed validarProprietario and validarProprietarioOuSocio
-
     @PreAuthorize("hasRole('PROPRIETARIO')")
     @PostMapping("/registrar-colaborador")
     public String registrar(

@@ -20,8 +20,6 @@ public class DashboardController {
     @Autowired
     private TokenService tokenService;
 
-    // Removed validarToken
-
     @GetMapping
     public ResponseEntity<DashboardDTO> getDashboard() {
         UsuarioDTO user = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();

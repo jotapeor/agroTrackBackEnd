@@ -31,6 +31,9 @@ public class AbastecimentoService {
     @Autowired
     private NotificacaoRepository notificacaoRepository;
 
+    @Autowired
+    private com.main.frotaBackEnd.repository.RegistroOperacaoRepository registroOperacaoRepository;
+
     @Transactional
     public Abastecimento registrarAbastecimento(Long idMaquina, AbastecimentoDTO dto, Long idUsuarioLogado, String perfilUsuario) {
         Maquina maquina = maquinaRepository.findById(idMaquina)
@@ -72,23 +75,42 @@ public class AbastecimentoService {
 
     private void recalcularConsumo(Maquina maquina, Abastecimento abastecimentoAtual) {
         List<Abastecimento> historico = abastecimentoRepository.buscarPorMaquinaId(maquina.getId());
-        if (historico.size() < 2) return; 
+        if (historico.size() < 2) return;
 
         Abastecimento anterior = historico.get(1);
         BigDecimal kmRodados = abastecimentoAtual.getHodometroAtual().subtract(anterior.getHodometroAtual());
-        
+
         if (kmRodados.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal novoConsumo = abastecimentoAtual.getLitros().divide(kmRodados, 2, RoundingMode.HALF_UP);
-            
+
             if (maquina.getConsumoMedio() != null && maquina.getConsumoMedio().compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal mediaHistorica = maquina.getConsumoMedio();
                 BigDecimal desvio = novoConsumo.subtract(mediaHistorica).abs().divide(mediaHistorica, 2, RoundingMode.HALF_UP);
-                
-                if (desvio.compareTo(new BigDecimal("0.30")) > 0) {
-                    gerarNotificacaoProprietario("anomalia", "Anomalia de consumo detectada na máquina " + maquina.getNome() + ". Consumo atual: " + novoConsumo + ", Média histórica: " + mediaHistorica + ".");
+
+                List<RegistroOperacao> operacoes = registroOperacaoRepository.buscarPorMaquinaIdEIntervalo(
+                        maquina.getId(), anterior.getDataAbastecimento(), abastecimentoAtual.getDataAbastecimento());
+
+                BigDecimal maxPeso = BigDecimal.ZERO;
+                for (RegistroOperacao op : operacoes) {
+                    if (op.getPesoCarregado() != null && op.getPesoCarregado().compareTo(maxPeso) > 0) {
+                        maxPeso = op.getPesoCarregado();
+                    }
+                }
+
+                BigDecimal capacidade = maquina.getCapacidadeTanque();
+                if (capacidade == null || capacidade.compareTo(BigDecimal.ZERO) <= 0) {
+                    capacidade = new BigDecimal("1000.0");
+                }
+
+                BigDecimal proporcaoPeso = maxPeso.divide(capacidade, 4, RoundingMode.HALF_UP);
+                BigDecimal ajuste = proporcaoPeso.multiply(new BigDecimal("0.20"));
+                BigDecimal limiteAjustado = new BigDecimal("0.30").add(ajuste);
+
+                if (desvio.compareTo(limiteAjustado) > 0) {
+                    gerarNotificacaoProprietario("anomalia", "Anomalia de consumo detectada na máquina " + maquina.getNome() + ". Consumo atual: " + novoConsumo + ", Média histórica: " + mediaHistorica + " (Desvio max ajustado: " + limiteAjustado.multiply(new BigDecimal("100")).setScale(1, RoundingMode.HALF_UP) + "%).");
                 }
             }
-            
+
             maquina.setConsumoMedio(novoConsumo);
         }
     }
@@ -99,7 +121,7 @@ public class AbastecimentoService {
             BigDecimal fator = hodometroAtual.divide(intervalo, 0, RoundingMode.FLOOR);
             BigDecimal ultimoPonto = fator.multiply(intervalo);
             BigDecimal proxima = ultimoPonto.add(intervalo);
-            
+
             if (proxima.subtract(hodometroAtual).compareTo(new BigDecimal("20")) <= 0) {
                 gerarNotificacaoProprietario("alerta_preventivo", "Máquina " + maquina.getNome() + " próxima da troca de óleo. Hodômetro: " + hodometroAtual);
             }
@@ -109,7 +131,7 @@ public class AbastecimentoService {
             BigDecimal fator = hodometroAtual.divide(intervalo, 0, RoundingMode.FLOOR);
             BigDecimal ultimoPonto = fator.multiply(intervalo);
             BigDecimal proxima = ultimoPonto.add(intervalo);
-            
+
             if (proxima.subtract(hodometroAtual).compareTo(new BigDecimal("20")) <= 0) {
                 gerarNotificacaoProprietario("alerta_preventivo", "Máquina " + maquina.getNome() + " próxima da inspeção. Hodômetro: " + hodometroAtual);
             }
@@ -120,7 +142,7 @@ public class AbastecimentoService {
         List<Usuario> proprietarios = userRepository.findAll().stream()
                 .filter(u -> "PROPRIETARIO".equals(u.getPerfil()))
                 .toList();
-        
+
         for (Usuario p : proprietarios) {
             Notificacao n = new Notificacao();
             n.setUsuarioDestinatario(p);

@@ -7,6 +7,9 @@ import com.main.frotaBackEnd.model.Talhao;
 import com.main.frotaBackEnd.repository.FazendaRepository;
 import com.main.frotaBackEnd.repository.MaquinaRepository;
 import com.main.frotaBackEnd.repository.TalhaoRepository;
+import com.main.frotaBackEnd.repository.AutorizacaoRiscoRepository;
+import com.main.frotaBackEnd.repository.UserRepository;
+import com.main.frotaBackEnd.model.AutorizacaoRisco;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,14 +24,19 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.nio.file.StandardCopyOption;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class MaquinaService {
+
+    private static final Logger log = LoggerFactory.getLogger(MaquinaService.class);
 
     @Autowired
     private MaquinaRepository maquinaRepository;
@@ -38,6 +46,12 @@ public class MaquinaService {
 
     @Autowired
     private TalhaoRepository talhaoRepository;
+
+    @Autowired
+    private AutorizacaoRiscoRepository autorizacaoRiscoRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -187,21 +201,33 @@ public class MaquinaService {
 
     @Transactional
     public void excluir(Long id) {
-        if (!maquinaRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada.");
+        Maquina maquina = maquinaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
         try {
-
-            entityManager.createNativeQuery("DELETE FROM usuario_maquina WHERE id_maquina = ?1").setParameter(1, id).executeUpdate();
-            entityManager.createNativeQuery("UPDATE notificacao SET id_maquina = NULL WHERE id_maquina = ?1").setParameter(1, id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM abastecimento WHERE id_maquina = ?1").setParameter(1, id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM registro_operacao WHERE id_maquina = ?1").setParameter(1, id).executeUpdate();
-            entityManager.createNativeQuery("DELETE FROM ordem_manutencao WHERE id_maquina = ?1").setParameter(1, id).executeUpdate();
-
-            maquinaRepository.deleteById(id);
+            maquina.setAtivo(false);
+            maquinaRepository.save(maquina);
         } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Erro ao excluir a máquina: " + e.getMessage());
+            log.error("Erro ao arquivar máquina id={}", id, e);
+            throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Não foi possível arquivar a máquina no momento. Tente novamente.");
         }
+    }
+
+    @Transactional
+    public void autorizarRisco(Long idMaquina, String justificativa, Long idProprietario) {
+        Maquina maquina = maquinaRepository.findById(idMaquina)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
+        if (!"Alto".equals(maquina.getNivelRisco())) {
+             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A máquina não está em nível de risco Alto.");
+        }
+        maquina.setAutorizadaOperacaoRisco(true);
+        maquinaRepository.save(maquina);
+
+        AutorizacaoRisco auth = new AutorizacaoRisco();
+        auth.setMaquina(maquina);
+        auth.setAutorizadoPor(userRepository.findById(idProprietario).orElseThrow());
+        auth.setJustificativa(justificativa);
+        auth.setDataAutorizacao(LocalDateTime.now());
+        autorizacaoRiscoRepository.save(auth);
     }
 
     private String salvarFoto(MultipartFile foto) {

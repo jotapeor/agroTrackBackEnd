@@ -20,6 +20,9 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
+    @Value("${api.security.token.expiration-ms:86400000}")
+    private long expirationMs;
+
     private SecretKey getSignKey() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(this.secret));
     }
@@ -30,6 +33,7 @@ public class TokenService {
                 || user.getSenha() == null || user.getSenha().isEmpty()) {
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Credenciais inválidas.");
         }
+
         return Jwts.builder()
                 .subject(user.getNome())
                 .claim("id_usuario", user.getId_usuario())
@@ -37,7 +41,7 @@ public class TokenService {
                 .claim("perfil", user.getPerfil())
                 .claim("primeiro_acesso", user.isPrimeiro_acesso())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 86_400_000))
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSignKey())
                 .compact();
     }

@@ -75,6 +75,8 @@ public class Maquina {
     @Column(name = "autorizada_operacao_risco")
     private boolean autorizadaOperacaoRisco = false;
 
+    private boolean ativo = true;
+
     @JsonIgnore
     @ManyToMany(mappedBy = "maquinas")
     private List<Usuario> usuarios = new ArrayList<>();
@@ -280,5 +282,13 @@ public class Maquina {
 
     public void setUsuarios(List<Usuario> usuarios) {
         this.usuarios = usuarios;
+    }
+
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
     }
 }

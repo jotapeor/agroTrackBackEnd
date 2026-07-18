@@ -23,8 +23,6 @@ public class ManutencaoController {
     @Autowired
     private ManutencaoService manutencaoService;
 
-    // Removed validarToken and validarProprietario
-
     @PostMapping("/maquina/{idMaquina}/ordens")
     public ResponseEntity<OrdemManutencaoDTO> abrirOrdem(
             @PathVariable Long idMaquina,
@@ -50,6 +48,13 @@ public class ManutencaoController {
             @PathVariable Long idOrdem,
             @RequestBody AcaoOrdemDTO dto) {
         return ResponseEntity.ok(manutencaoService.encerrarOrdem(idOrdem, dto.getObservacao()));
+    }
+
+    @PreAuthorize("hasRole('PROPRIETARIO')")
+    @DeleteMapping("/ordens/{idOrdem}")
+    public ResponseEntity<Map<String, String>> removerDaAba(@PathVariable Long idOrdem) {
+        manutencaoService.removerDaAba(idOrdem);
+        return ResponseEntity.ok(Map.of("message", "Ordem removida da aba com sucesso!"));
     }
 
     @GetMapping("/ordens")

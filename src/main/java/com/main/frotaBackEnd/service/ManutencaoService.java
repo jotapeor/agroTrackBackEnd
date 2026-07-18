@@ -58,7 +58,7 @@ public class ManutencaoService {
         ordem.setPrioridade(prioridade);
         ordem.setDescricao(dto.getDescricao());
         ordem.setDataAbertura(LocalDateTime.now());
-        
+
         ordem = ordemManutencaoRepository.save(ordem);
 
         if ("Aguardando Aprovação".equals(status)) {
@@ -107,7 +107,7 @@ public class ManutencaoService {
         ordem.setStatus("Encerrada");
         ordem.setObservacaoEncerramento(observacao);
         ordem.setDataEncerramento(LocalDateTime.now());
-        
+
         ordem = ordemManutencaoRepository.save(ordem);
 
         classificacaoRiscoService.recalcularRisco(ordem.getMaquina());
@@ -115,20 +115,35 @@ public class ManutencaoService {
         return toDTO(ordem);
     }
 
+    @Transactional
+    public void removerDaAba(Long idOrdem) {
+        OrdemManutencao ordem = ordemManutencaoRepository.findById(idOrdem)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Ordem não encontrada."));
+
+        if (!"Encerrada".equals(ordem.getStatus()) && !"Recusada".equals(ordem.getStatus())) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Apenas ordens encerradas ou recusadas podem ser removidas da aba.");
+        }
+
+        ordem.setRemovidaDaAba(true);
+        ordemManutencaoRepository.save(ordem);
+    }
+
     public List<OrdemManutencaoDTO> listarOrdens(Long idUsuario, String perfilUsuario) {
         if ("PROPRIETARIO".equals(perfilUsuario) || "SOCIO".equals(perfilUsuario)) {
             return ordemManutencaoRepository.findAll().stream()
+                    .filter(o -> !o.isRemovidaDaAba())
                     .sorted((a, b) -> b.getDataAbertura().compareTo(a.getDataAbertura()))
                     .map(this::toDTO)
                     .collect(Collectors.toList());
         }
-        
+
         Usuario usuario = userRepository.findById(idUsuario).orElse(null);
         if (usuario == null) return List.of();
-        
+
         List<Long> idsMaquinasVinculadas = usuario.getMaquinas().stream().map(Maquina::getId).toList();
-        
+
         return ordemManutencaoRepository.findAll().stream()
+                .filter(o -> !o.isRemovidaDaAba())
                 .filter(o -> idsMaquinasVinculadas.contains(o.getMaquina().getId()))
                 .sorted((a, b) -> b.getDataAbertura().compareTo(a.getDataAbertura()))
                 .map(this::toDTO)
@@ -139,7 +154,7 @@ public class ManutencaoService {
         List<Usuario> proprietarios = userRepository.findAll().stream()
                 .filter(u -> "PROPRIETARIO".equals(u.getPerfil()))
                 .toList();
-        
+
         for (Usuario p : proprietarios) {
             Notificacao n = new Notificacao();
             n.setUsuarioDestinatario(p);

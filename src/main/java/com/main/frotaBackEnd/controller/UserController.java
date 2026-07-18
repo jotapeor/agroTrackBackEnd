@@ -100,7 +100,7 @@ public class UserController {
 
         try {
             userRepository.save(usuario);
-            // Gera novo token com dados atualizados (nome atualizado, etc.)
+
             String novoTicket = tokenService.gerarToken(usuario);
             return ResponseEntity.ok(Map.of("message", "Dados atualizados com sucesso!", "token", novoTicket));
         } catch (RuntimeException e) {

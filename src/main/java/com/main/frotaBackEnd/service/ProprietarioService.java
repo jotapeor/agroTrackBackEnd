@@ -72,7 +72,6 @@ public class ProprietarioService {
         Usuario usuario = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Colaborador não encontrado."));
 
-        // SÓCIO só pode editar OPERADOR
         if (PerfilUsuario.SOCIO.equals(solicitante.getPerfil())) {
             if (!PerfilUsuario.OPERADOR.equals(usuario.getPerfil()))
                 throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Você não tem permissão para editar este colaborador.");
@@ -101,7 +100,7 @@ public class ProprietarioService {
         if (perfil != null && !perfil.isEmpty()) {
             if (!perfil.equals(PerfilUsuario.PROPRIETARIO) && !perfil.equals(PerfilUsuario.SOCIO) && !perfil.equals(PerfilUsuario.OPERADOR))
                 throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Perfil inválido.");
-            // SÓCIO não pode promover ninguém para PROPRIETARIO ou SÓCIO
+
             if (PerfilUsuario.SOCIO.equals(solicitante.getPerfil()) &&
                 (PerfilUsuario.PROPRIETARIO.equals(perfil) || PerfilUsuario.SOCIO.equals(perfil)))
                 throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Você não pode alterar o perfil para Proprietário ou Sócio.");
@@ -124,7 +123,6 @@ public class ProprietarioService {
         Usuario usuario = userRepository.findById(idUsuario)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Colaborador não encontrado."));
 
-        // SÓCIO só pode vincular máquinas a OPERADOR
         if (PerfilUsuario.SOCIO.equals(solicitante.getPerfil()) && !PerfilUsuario.OPERADOR.equals(usuario.getPerfil()))
             throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Você só pode vincular máquinas a operadores.");
 

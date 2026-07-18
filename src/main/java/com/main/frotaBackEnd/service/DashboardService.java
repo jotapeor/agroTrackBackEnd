@@ -28,7 +28,7 @@ public class DashboardService {
 
     @Autowired
     private NotificacaoService notificacaoService;
-    
+
     @Autowired
     private NotificacaoRepository notificacaoRepository;
 
@@ -49,11 +49,12 @@ public class DashboardService {
         statusCount.put("Disponivel", 0L);
         statusCount.put("Em Operacao", 0L);
         statusCount.put("Em Manutencao", 0L);
-        statusCount.put("Inativa", 0L);
 
         long maquinasRiscoAlto = 0;
 
         for (Maquina m : maquinas) {
+            if (!m.isAtivo()) continue;
+
             String st = m.getStatus();
             if (st != null && statusCount.containsKey(st)) {
                 statusCount.put(st, statusCount.get(st) + 1);
@@ -64,7 +65,7 @@ public class DashboardService {
         }
 
         List<Notificacao> notificacoes = notificacaoRepository.buscarPorUsuarioId(idUsuarioLogado);
-        
+
         long alertasAtivos = notificacoes.stream()
                 .filter(n -> !n.isLida() && (n.getTipo().startsWith("alerta") || n.getTipo().startsWith("anomalia")))
                 .count();
@@ -73,7 +74,7 @@ public class DashboardService {
         dto.setMaquinasPorStatus(statusCount);
         dto.setAlertasAtivos(alertasAtivos);
         dto.setMaquinasRiscoAlto(maquinasRiscoAlto);
-        
+
         dto.setNotificacoesRecentes(notificacaoService.listarPorUsuario(idUsuarioLogado).stream().limit(5).collect(Collectors.toList()));
 
         return dto;
