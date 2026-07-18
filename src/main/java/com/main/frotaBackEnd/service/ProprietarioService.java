@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,6 +33,9 @@ public class ProprietarioService {
 
     @Autowired
     private MaquinaRepository maquinaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir.usuarios:uploads/usuarios}")
     private String uploadDirUsuarios;
@@ -52,7 +57,7 @@ public class ProprietarioService {
             Usuario usuario = new Usuario();
             usuario.setNome(nome.trim());
             usuario.setEmail(email.trim());
-            usuario.setSenha(senha);
+            usuario.setSenha(passwordEncoder.encode(senha));
             usuario.setPerfil(perfil);
             if (foto != null && !foto.isEmpty()) {
                 usuario.setFoto_path(salvarFoto(foto));

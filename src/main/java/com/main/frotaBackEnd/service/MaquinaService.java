@@ -48,8 +48,8 @@ public class MaquinaService {
     public void cadastrar(MaquinaDTO dto, MultipartFile foto) {
         if (dto.getNome() == null || dto.getNome().trim().length() < 2)
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Insira um nome/apelido para a máquina (mínimo 2 caracteres).");
-        if (dto.getTipo() == null || (!dto.getTipo().equals("Trator") && !dto.getTipo().equals("Colheitadeira") && !dto.getTipo().equals("Pulverizador")))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Tipo de máquina inválido. Use: Trator, Colheitadeira ou Pulverizador.");
+        if (dto.getTipo() == null || (!dto.getTipo().equals("Trator") && !dto.getTipo().equals("Colheitadeira") && !dto.getTipo().equals("Pulverizador") && !dto.getTipo().equals("Semeadeira")))
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Tipo de máquina inválido. Use: Trator, Colheitadeira, Pulverizador ou Semeadeira.");
         if (dto.getModelo() == null || dto.getModelo().trim().isEmpty())
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "O modelo é obrigatório.");
         if (dto.getAno() < 1900 || dto.getAno() > LocalDate.now().getYear() + 1)
@@ -131,7 +131,7 @@ public class MaquinaService {
 
         if (dto.getNome() == null || dto.getNome().trim().length() < 2)
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Insira um nome/apelido para a máquina (mínimo 2 caracteres).");
-        if (dto.getTipo() == null || (!dto.getTipo().equals("Trator") && !dto.getTipo().equals("Colheitadeira") && !dto.getTipo().equals("Pulverizador")))
+        if (dto.getTipo() == null || (!dto.getTipo().equals("Trator") && !dto.getTipo().equals("Colheitadeira") && !dto.getTipo().equals("Pulverizador") && !dto.getTipo().equals("Semeadeira")))
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Tipo de máquina inválido.");
 
         maquina.setNome(dto.getNome().trim());
@@ -248,6 +248,7 @@ public class MaquinaService {
         dto.setValorAquisicao(m.getValorAquisicao());
         dto.setFotoPath(m.getFotoPath());
         dto.setObservacoes(m.getObservacoes());
+        dto.setAutorizadaOperacaoRisco(m.isAutorizadaOperacaoRisco());
         return dto;
     }
 }

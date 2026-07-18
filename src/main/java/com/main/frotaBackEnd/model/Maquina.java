@@ -72,6 +72,9 @@ public class Maquina {
     @Column(name = "data_cadastro")
     private Date dataCadastro;
 
+    @Column(name = "autorizada_operacao_risco")
+    private boolean autorizadaOperacaoRisco = false;
+
     @JsonIgnore
     @ManyToMany(mappedBy = "maquinas")
     private List<Usuario> usuarios = new ArrayList<>();
@@ -261,6 +264,14 @@ public class Maquina {
 
     public void setDataCadastro(Date dataCadastro) {
         this.dataCadastro = dataCadastro;
+    }
+
+    public boolean isAutorizadaOperacaoRisco() {
+        return autorizadaOperacaoRisco;
+    }
+
+    public void setAutorizadaOperacaoRisco(boolean autorizadaOperacaoRisco) {
+        this.autorizadaOperacaoRisco = autorizadaOperacaoRisco;
     }
 
     public List<Usuario> getUsuarios() {

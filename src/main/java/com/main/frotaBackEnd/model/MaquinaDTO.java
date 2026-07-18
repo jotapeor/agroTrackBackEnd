@@ -27,6 +27,7 @@ public class MaquinaDTO {
     private BigDecimal valorAquisicao;
     private String fotoPath;
     private String observacoes;
+    private boolean autorizadaOperacaoRisco;
 
     public MaquinaDTO() {
     }
@@ -221,5 +222,13 @@ public class MaquinaDTO {
 
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
+    }
+
+    public boolean isAutorizadaOperacaoRisco() {
+        return autorizadaOperacaoRisco;
+    }
+
+    public void setAutorizadaOperacaoRisco(boolean autorizadaOperacaoRisco) {
+        this.autorizadaOperacaoRisco = autorizadaOperacaoRisco;
     }
 }
