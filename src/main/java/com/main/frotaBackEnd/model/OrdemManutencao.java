@@ -39,6 +39,9 @@ public class OrdemManutencao {
     @Column(name = "observacao_encerramento")
     private String observacaoEncerramento;
 
+    @Column(name = "removida_da_aba")
+    private boolean removidaDaAba = false;
+
     public OrdemManutencao() {
     }
 
@@ -112,5 +115,13 @@ public class OrdemManutencao {
 
     public void setObservacaoEncerramento(String observacaoEncerramento) {
         this.observacaoEncerramento = observacaoEncerramento;
+    }
+
+    public boolean isRemovidaDaAba() {
+        return removidaDaAba;
+    }
+
+    public void setRemovidaDaAba(boolean removidaDaAba) {
+        this.removidaDaAba = removidaDaAba;
     }
 }

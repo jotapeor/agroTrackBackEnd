@@ -9,9 +9,12 @@ import java.util.List;
 
 @Repository
 public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
-    @Query("select m from Maquina m order by m.dataCadastro desc")
+    @Query("select m from Maquina m where m.ativo = true order by m.dataCadastro desc")
     List<Maquina> buscarTodosOrdenados();
 
-    @Query("select m from Maquina m join m.usuarios u where u.id_usuario = ?1 order by m.dataCadastro desc")
+    @Query("select m from Maquina m join m.usuarios u where u.id_usuario = ?1 and m.ativo = true order by m.dataCadastro desc")
     List<Maquina> buscarPorUsuarioId(Long usuarioId);
+
+    @Query("select m from Maquina m where m.ativo = true and m.status = 'Em Operacao' order by m.nome asc")
+    List<Maquina> buscarEmOperacao();
 }

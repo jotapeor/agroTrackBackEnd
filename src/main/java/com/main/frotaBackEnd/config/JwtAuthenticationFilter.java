@@ -1,5 +1,7 @@
 package com.main.frotaBackEnd.config;
 
+import com.main.frotaBackEnd.model.Usuario;
+import com.main.frotaBackEnd.repository.UserRepository;
 import com.main.frotaBackEnd.model.UsuarioDTO;
 import com.main.frotaBackEnd.service.TokenService;
 import jakarta.servlet.FilterChain;
@@ -14,14 +16,17 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Optional;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(TokenService tokenService) {
+    public JwtAuthenticationFilter(TokenService tokenService, UserRepository userRepository) {
         this.tokenService = tokenService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -33,18 +38,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 if (tokenService.validarToken(token)) {
                     UsuarioDTO usuario = tokenService.extrairClaim(token);
-                    
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + usuario.getPerfil().toUpperCase());
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            usuario, null, Collections.singletonList(authority));
-                    
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    Optional<Usuario> userOp = userRepository.findById(usuario.getId_usuario());
+                    if (userOp.isPresent() && userOp.get().isAtivo()) {
+                        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + usuario.getPerfil().toUpperCase());
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                usuario, null, Collections.singletonList(authority));
+
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    }
                 }
             } catch (Exception e) {
-                // Ignore invalid token here, SecurityFilterChain will block if authentication is required
+
             }
         }
-        
+
         filterChain.doFilter(request, response);
     }
 }

@@ -24,8 +24,6 @@ public class OperacaoController {
     @Autowired
     private TokenService tokenService;
 
-    // Removed validarToken
-
     @PostMapping("/maquina/{idMaquina}/status")
     public ResponseEntity<?> trocarStatus(
             @PathVariable Long idMaquina,
@@ -33,7 +31,7 @@ public class OperacaoController {
 
         UsuarioDTO usuario = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         RegistroOperacaoDTO resumo = operacaoService.trocarStatus(idMaquina, dto, usuario.getId_usuario(), usuario.getPerfil());
-        
+
         if (resumo != null) {
             return ResponseEntity.ok(resumo);
         } else {
@@ -42,9 +40,9 @@ public class OperacaoController {
     }
 
     @GetMapping("/maquina/{idMaquina}/historico")
-    public ResponseEntity<List<RegistroOperacaoDTO>> listarHistorico(
+    public ResponseEntity<List<Map<String, Object>>> listarHistorico(
             @PathVariable Long idMaquina) {
-        
+
         return ResponseEntity.ok(operacaoService.listarHistoricoMaquina(idMaquina));
     }
 }

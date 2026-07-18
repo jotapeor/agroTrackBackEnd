@@ -15,4 +15,7 @@ public interface NotificacaoRepository extends JpaRepository<Notificacao, Long> 
 
     @Query("select n from Notificacao n where n.maquina.id = ?1 order by n.dataCriacao desc")
     List<Notificacao> buscarPorMaquinaId(Long maquinaId);
+
+    @Query("select n from Notificacao n where n.maquina.id = ?1 and n.dataCriacao >= ?2 and n.dataCriacao <= ?3 order by n.dataCriacao desc")
+    List<Notificacao> buscarPorMaquinaEIntervalo(Long maquinaId, java.time.LocalDateTime inicio, java.time.LocalDateTime fim);
 }
