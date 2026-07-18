@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 import java.util.Map;
 
@@ -34,26 +35,12 @@ public class MaquinaController {
     @Autowired
     private TalhaoRepository talhaoRepository;
 
-    private UsuarioDTO validarToken(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(401), "Token ausente.");
-        String token = authHeader.replace("Bearer ", "");
-        if (!tokenService.validarToken(token))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(401), "Token inválido ou expirado.");
-        return tokenService.extrairClaim(token);
-    }
+    @Autowired
+    private com.main.frotaBackEnd.repository.MaquinaRepository maquinaRepository;
 
-    private UsuarioDTO validarProprietario(String authHeader) {
-        UsuarioDTO solicitante = validarToken(authHeader);
-        if (!"PROPRIETARIO".equals(solicitante.getPerfil()))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Acesso negado.");
-        return solicitante;
-    }
+    // Removed validarToken, validarProprietario, and isProprietarioOuSocio
 
-    private boolean isProprietarioOuSocio(UsuarioDTO user) {
-        return "PROPRIETARIO".equals(user.getPerfil()) || "SOCIO".equals(user.getPerfil());
-    }
-
+    @PreAuthorize("hasRole('PROPRIETARIO')")
     @PostMapping
     public ResponseEntity<Map<String, String>> cadastrar(
             @RequestParam("nome") String nome,
@@ -74,10 +61,7 @@ public class MaquinaController {
             @RequestParam(value = "data_aquisicao", required = false) String dataAquisicao,
             @RequestParam(value = "valor_aquisicao", required = false) String valorAquisicao,
             @RequestParam(value = "observacoes", required = false) String observacoes,
-            @RequestParam(value = "foto", required = false) MultipartFile foto,
-            @RequestHeader("Authorization") String authHeader) {
-
-        validarProprietario(authHeader);
+            @RequestParam(value = "foto", required = false) MultipartFile foto) {
 
         MaquinaDTO dto = new MaquinaDTO();
         dto.setNome(nome);
@@ -120,20 +104,20 @@ public class MaquinaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MaquinaDTO>> listar(@RequestHeader("Authorization") String authHeader) {
-        UsuarioDTO user = validarToken(authHeader);
-        if (isProprietarioOuSocio(user)) {
+    public ResponseEntity<List<MaquinaDTO>> listar() {
+        UsuarioDTO user = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if ("PROPRIETARIO".equals(user.getPerfil()) || "SOCIO".equals(user.getPerfil())) {
             return ResponseEntity.ok(maquinaService.listarTodas());
         }
         return ResponseEntity.ok(maquinaService.listarPorUsuario(user.getId_usuario()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MaquinaDTO> buscar(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
-        validarToken(authHeader);
+    public ResponseEntity<MaquinaDTO> buscar(@PathVariable Long id) {
         return ResponseEntity.ok(maquinaService.buscarPorId(id));
     }
 
+    @PreAuthorize("hasRole('PROPRIETARIO')")
     @PostMapping("/{id}")
     public ResponseEntity<Map<String, String>> atualizar(
             @PathVariable Long id,
@@ -157,10 +141,7 @@ public class MaquinaController {
             @RequestParam(value = "data_aquisicao", required = false) String dataAquisicao,
             @RequestParam(value = "valor_aquisicao", required = false) String valorAquisicao,
             @RequestParam(value = "observacoes", required = false) String observacoes,
-            @RequestParam(value = "foto", required = false) MultipartFile foto,
-            @RequestHeader("Authorization") String authHeader) {
-
-        validarProprietario(authHeader);
+            @RequestParam(value = "foto", required = false) MultipartFile foto) {
 
         MaquinaDTO dto = new MaquinaDTO();
         dto.setNome(nome);
@@ -201,27 +182,47 @@ public class MaquinaController {
         return ResponseEntity.ok(Map.of("message", "Máquina atualizada com sucesso!"));
     }
 
+    @PreAuthorize("hasRole('PROPRIETARIO')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> excluir(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
-        validarProprietario(authHeader);
+    public ResponseEntity<Map<String, String>> excluir(@PathVariable Long id) {
         maquinaService.excluir(id);
         return ResponseEntity.ok(Map.of("message", "Máquina excluída com sucesso!"));
     }
 
     @GetMapping("/fazendas")
-    public ResponseEntity<List<Fazenda>> listarFazendas(@RequestHeader("Authorization") String authHeader) {
-        validarToken(authHeader);
+    public ResponseEntity<List<Fazenda>> listarFazendas() {
         return ResponseEntity.ok(fazendaRepository.findAllByAtivoTrueOrderByNome());
     }
 
     @GetMapping("/talhoes")
     public ResponseEntity<List<Talhao>> listarTalhoes(
-            @RequestParam(value = "id_fazenda", required = false) Long idFazenda,
-            @RequestHeader("Authorization") String authHeader) {
-        validarToken(authHeader);
+            @RequestParam(value = "id_fazenda", required = false) Long idFazenda) {
         if (idFazenda != null) {
             return ResponseEntity.ok(talhaoRepository.buscarPorFazenda(idFazenda));
         }
         return ResponseEntity.ok(talhaoRepository.findAll());
+    }
+
+    @PreAuthorize("hasRole('PROPRIETARIO')")
+    @PostMapping("/{id}/autorizar-risco")
+    public ResponseEntity<Map<String, String>> autorizarRisco(
+            @PathVariable Long id,
+            @RequestBody com.main.frotaBackEnd.model.AutorizacaoRiscoDTO dto) {
+
+        if (dto.getJustificativa() == null || dto.getJustificativa().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A justificativa é obrigatória.");
+        }
+
+        com.main.frotaBackEnd.model.Maquina maquina = maquinaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
+        
+        if (!"Alto".equals(maquina.getNivelRisco())) {
+             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A máquina não está em nível de risco Alto.");
+        }
+        
+        maquina.setAutorizadaOperacaoRisco(true);
+        maquinaRepository.save(maquina);
+
+        return ResponseEntity.ok(Map.of("message", "Operação temporária autorizada com sucesso."));
     }
 }

@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface UserRepository extends JpaRepository<Usuario, Long> {
-    @Query("select u from Usuario u where u.email = ?1 and u.senha = ?2")
-    Usuario login(String email, String senha);
+    @Query("select u from Usuario u where u.email = ?1")
+    Usuario login(String email);
 
     @Query("select count(u) > 0 from Usuario u where u.email = ?1")
     boolean emailExiste(String email);
@@ -21,4 +21,7 @@ public interface UserRepository extends JpaRepository<Usuario, Long> {
     @Transactional
     @Query("update Usuario u set u.senha = ?1, u.primeiro_acesso = false where u.id_usuario = ?2")
     int alterarSenha(String novaSenha, Long idUsuario);
+
+    @Query("select count(m) > 0 from Usuario u join u.maquinas m where u.id_usuario = ?1 and m.id = ?2")
+    boolean verificaVinculo(Long usuarioId, Long maquinaId);
 }

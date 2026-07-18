@@ -138,6 +138,7 @@ CREATE TABLE `maquina` (
   `foto_path` varchar(255) DEFAULT NULL,
   `observacoes` text,
   `data_cadastro` datetime DEFAULT CURRENT_TIMESTAMP,
+  `autorizada_operacao_risco` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id_maquina`),
   KEY `id_fazenda` (`id_fazenda`),
   KEY `id_talhao` (`id_talhao`),
@@ -152,7 +153,7 @@ CREATE TABLE `maquina` (
 
 LOCK TABLES `maquina` WRITE;
 /*!40000 ALTER TABLE `maquina` DISABLE KEYS */;
-INSERT INTO `maquina` VALUES (1,1,1,'Trator 01 - John Deere','Trator','John Deere','6100J',2021,'9YZ1234XG1234567','ABC-1234',1250.50,250.00,'Diesel S10',250,500,12.50,'Disponivel','Baixo','2020-01-15',320000.00,NULL,'Trator principal para preparo de solo.','2026-06-23 13:45:24'),(2,1,2,'Colheitadeira Case IH','Colheitadeira','Case IH','250 Series',2023,'H8T5678AB9012345','DEF-5678',450.00,400.00,'Diesel S500',200,300,35.00,'Em Operacao','Medio','2023-03-10',890000.00,NULL,'Colheitadeira de alta capacidade para grãos.','2026-06-23 13:45:24'),(3,2,4,'Pulverizador Jacto 3030','Pulverizador','Jacto','Uniport 3030',2020,'P3X9012CD3456789',NULL,3200.80,300.00,'Diesel S10',250,400,18.20,'Em Manutencao','Alto','2020-06-20',450000.00,NULL,'Apresentou falha na bomba hidráulica.','2026-06-23 13:45:24'),(4,2,5,'Trator MF 4275','Trator','Massey Ferguson','4275',2022,'M4F3456EF7890123','GHI-9012',890.30,250.00,'Diesel S10',250,500,13.80,'Disponivel','Baixo','2022-02-10',280000.00,NULL,'Utilizado em operações de plantio direto.','2026-06-24 09:00:00'),(5,3,6,'Colheitadeira NH CR6.90','Colheitadeira','New Holland','CR6.90',2024,'N5H7890GH1234567','JKL-3456',120.00,450.00,'Diesel S500',200,300,40.50,'Em Operacao','Medio','2024-01-05',950000.00,NULL,'Colheitadeira nova para a safra de café.','2026-06-24 09:05:00'),(6,3,7,'Pulverizador Stara','Pulverizador','Stara','Imperador 3.0',2021,'S6T1234IJ5678901',NULL,2100.60,350.00,'Diesel S10',250,400,17.90,'Disponivel','Baixo','2021-05-15',520000.00,NULL,'Pulverizador para aplicação de defensivos.','2026-06-24 09:10:00');
+INSERT INTO `maquina` VALUES (1,1,1,'Trator 01 - John Deere','Trator','John Deere','6100J',2021,'9YZ1234XG1234567','ABC-1234',1250.50,250.00,'Diesel S10',250,500,12.50,'Disponivel','Baixo','2020-01-15',320000.00,NULL,'Trator principal para preparo de solo.','2026-06-23 13:45:24',0),(2,1,2,'Colheitadeira Case IH','Colheitadeira','Case IH','250 Series',2023,'H8T5678AB9012345','DEF-5678',450.00,400.00,'Diesel S500',200,300,35.00,'Em Operacao','Medio','2023-03-10',890000.00,NULL,'Colheitadeira de alta capacidade para grãos.','2026-06-23 13:45:24',0),(3,2,4,'Pulverizador Jacto 3030','Pulverizador','Jacto','Uniport 3030',2020,'P3X9012CD3456789',NULL,3200.80,300.00,'Diesel S10',250,400,18.20,'Em Manutencao','Alto','2020-06-20',450000.00,NULL,'Apresentou falha na bomba hidráulica.','2026-06-23 13:45:24',0),(4,2,5,'Trator MF 4275','Trator','Massey Ferguson','4275',2022,'M4F3456EF7890123','GHI-9012',890.30,250.00,'Diesel S10',250,500,13.80,'Disponivel','Baixo','2022-02-10',280000.00,NULL,'Utilizado em operações de plantio direto.','2026-06-24 09:00:00',0),(5,3,6,'Colheitadeira NH CR6.90','Colheitadeira','New Holland','CR6.90',2024,'N5H7890GH1234567','JKL-3456',120.00,450.00,'Diesel S500',200,300,40.50,'Em Operacao','Medio','2024-01-05',950000.00,NULL,'Colheitadeira nova para a safra de café.','2026-06-24 09:05:00',0),(6,3,7,'Pulverizador Stara','Pulverizador','Stara','Imperador 3.0',2021,'S6T1234IJ5678901',NULL,2100.60,350.00,'Diesel S10',250,400,17.90,'Disponivel','Baixo','2021-05-15',520000.00,NULL,'Pulverizador para aplicação de defensivos.','2026-06-24 09:10:00',0);
 /*!40000 ALTER TABLE `maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -167,7 +168,7 @@ CREATE TABLE `notificacao` (
   `id_notificacao` int NOT NULL AUTO_INCREMENT,
   `id_usuario` int NOT NULL,
   `id_maquina` int DEFAULT NULL,
-  `tipo` enum('Preventivo','Anomalia','Risco','Aprovacao') NOT NULL,
+  `tipo` varchar(50) NOT NULL,
   `mensagem` text NOT NULL,
   `lida` tinyint(1) DEFAULT '0',
   `data_criacao` datetime DEFAULT CURRENT_TIMESTAMP,
@@ -200,7 +201,7 @@ CREATE TABLE `ordem_manutencao` (
   `id_ordem` int NOT NULL AUTO_INCREMENT,
   `id_maquina` int NOT NULL,
   `id_solicitante` int NOT NULL,
-  `status` enum('Aguardando Aprovação','Ativa','Encerrada') NOT NULL,
+  `status` enum('Aguardando Aprovação','Ativa','Encerrada','Recusada') NOT NULL,
   `prioridade` enum('Baixa','Media','Alta','Critica') NOT NULL,
   `descricao` text NOT NULL,
   `observacao_encerramento` text,
@@ -288,13 +289,13 @@ CREATE TABLE `usuario` (
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
 INSERT INTO `usuario` (`id_usuario`, `nome`, `email`, `senha`, `perfil`, `ativo`, `primeiro_acesso`, `foto_path`, `data_criacao`) VALUES
-(1,'João Batista','joao.batista@fazenda.com.br','123456','PROPRIETARIO',1,0,NULL,'2026-06-23 13:45:21'),
-(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','123456','OPERADOR',1,0,NULL,'2026-06-23 13:45:21'),
-(3,'Marcos Silva','marcos.silva@fazenda.com.br','123456','OPERADOR',1,1,NULL,'2026-06-23 13:45:21'),
-(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','123456','OPERADOR',1,1,NULL,'2026-06-24 08:10:00'),
-(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','123456','OPERADOR',1,0,NULL,'2026-06-24 08:15:00'),
-(6,'Patrícia Souza','patricia.souza@fazenda.com.br','123456','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00'),
-(7,'Roberto Lima','roberto.lima@fazenda.com.br','123456','SOCIO',1,1,NULL,'2026-07-16 10:00:00');
+(1,'João Batista','joao.batista@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,0,NULL,'2026-06-23 13:45:21'),
+(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-23 13:45:21'),
+(3,'Marcos Silva','marcos.silva@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-23 13:45:21'),
+(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-24 08:10:00'),
+(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-24 08:15:00'),
+(6,'Patrícia Souza','patricia.souza@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00'),
+(7,'Roberto Lima','roberto.lima@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','SOCIO',1,1,NULL,'2026-07-16 10:00:00');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 

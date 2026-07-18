@@ -1,0 +1,21 @@
+package com.main.frotaBackEnd.repository;
+
+import com.main.frotaBackEnd.model.RegistroOperacao;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface RegistroOperacaoRepository extends JpaRepository<RegistroOperacao, Long> {
+
+    @Query("select r from RegistroOperacao r where r.maquina.id = ?1 order by r.dataInicio desc")
+    List<RegistroOperacao> buscarPorMaquinaId(Long maquinaId);
+
+    @Query("select r from RegistroOperacao r where r.operador.id_usuario = ?1 order by r.dataInicio desc")
+    List<RegistroOperacao> buscarPorOperadorId(Long operadorId);
+
+    @Query("select r from RegistroOperacao r where r.maquina.id = ?1 and r.dataFim is null order by r.dataInicio desc")
+    List<RegistroOperacao> buscarOperacoesAtivas(Long maquinaId);
+}
