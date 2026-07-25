@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class OperacaoController {
     @Autowired
     private TokenService tokenService;
 
+    @PreAuthorize("hasAnyRole('PROPRIETARIO', 'SOCIO', 'OPERADOR')")
     @PostMapping("/maquina/{idMaquina}/status")
     public ResponseEntity<?> trocarStatus(
             @PathVariable Long idMaquina,
@@ -39,6 +41,7 @@ public class OperacaoController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('PROPRIETARIO', 'SOCIO', 'OPERADOR')")
     @GetMapping("/maquina/{idMaquina}/historico")
     public ResponseEntity<List<Map<String, Object>>> listarHistorico(
             @PathVariable Long idMaquina) {

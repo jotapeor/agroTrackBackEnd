@@ -38,7 +38,11 @@ public class ClassificacaoRiscoService {
                 .toList();
 
         long falhas = operacoesRecentes.stream()
-                .filter(r -> r.getObservacoes() != null && r.getObservacoes().toLowerCase().contains("falha"))
+                .filter(r -> {
+                    if (r.getObservacoes() == null) return false;
+                    String obs = r.getObservacoes().toLowerCase();
+                    return obs.contains("falha") && !obs.contains("sem falha") && !obs.contains("nenhuma falha");
+                })
                 .count();
 
         String novoRisco = "Baixo";

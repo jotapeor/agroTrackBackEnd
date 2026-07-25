@@ -35,4 +35,11 @@ public class NotificacaoController {
         notificacaoService.marcarComoLida(id, user.getId_usuario());
         return ResponseEntity.ok(Map.of("message", "Notificação marcada como lida."));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> remover(@PathVariable Long id) {
+        UsuarioDTO user = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        notificacaoService.remover(id, user.getId_usuario());
+        return ResponseEntity.ok(Map.of("message", "Notificação removida."));
+    }
 }

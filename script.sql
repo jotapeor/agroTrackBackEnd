@@ -136,7 +136,7 @@ CREATE TABLE `maquina` (
   `id_fazenda` int DEFAULT NULL,
   `id_talhao` int DEFAULT NULL,
   `nome` varchar(100) NOT NULL,
-  `tipo` enum('Trator','Colheitadeira','Pulverizador') NOT NULL,
+  `tipo` enum('Trator','Colheitadeira','Pulverizador','Semeadeira') NOT NULL,
   `marca` varchar(100) DEFAULT NULL,
   `modelo` varchar(100) NOT NULL,
   `ano` int NOT NULL,
@@ -171,8 +171,32 @@ CREATE TABLE `maquina` (
 
 LOCK TABLES `maquina` WRITE;
 /*!40000 ALTER TABLE `maquina` DISABLE KEYS */;
-INSERT INTO `maquina` VALUES (1,1,1,'Trator 01 - John Deere','Trator','John Deere','6100J',2021,'9YZ1234XG1234567','ABC-1234',1250.50,250.00,'Diesel S10',250,500,12.50,'Disponivel','Baixo','2020-01-15',320000.00,NULL,'Trator principal para preparo de solo.','2026-06-23 13:45:24',0,1),(2,1,2,'Colheitadeira Case IH','Colheitadeira','Case IH','250 Series',2023,'H8T5678AB9012345','DEF-5678',450.00,400.00,'Diesel S500',200,300,35.00,'Em Operacao','Medio','2023-03-10',890000.00,NULL,'Colheitadeira de alta capacidade para grãos.','2026-06-23 13:45:24',0,1),(3,2,4,'Pulverizador Jacto 3030','Pulverizador','Jacto','Uniport 3030',2020,'P3X9012CD3456789',NULL,3200.80,300.00,'Diesel S10',250,400,18.20,'Em Manutencao','Alto','2020-06-20',450000.00,NULL,'Apresentou falha na bomba hidráulica.','2026-06-23 13:45:24',0,1),(4,2,5,'Trator MF 4275','Trator','Massey Ferguson','4275',2022,'M4F3456EF7890123','GHI-9012',890.30,250.00,'Diesel S10',250,500,13.80,'Disponivel','Baixo','2022-02-10',280000.00,NULL,'Utilizado em operações de plantio direto.','2026-06-24 09:00:00',0,1),(5,3,6,'Colheitadeira NH CR6.90','Colheitadeira','New Holland','CR6.90',2024,'N5H7890GH1234567','JKL-3456',120.00,450.00,'Diesel S500',200,300,40.50,'Em Operacao','Medio','2024-01-05',950000.00,NULL,'Colheitadeira nova para a safra de café.','2026-06-24 09:05:00',0,1),(6,3,7,'Pulverizador Stara','Pulverizador','Stara','Imperador 3.0',2021,'S6T1234IJ5678901',NULL,2100.60,350.00,'Diesel S10',250,400,17.90,'Disponivel','Baixo','2021-05-15',520000.00,NULL,'Pulverizador para aplicação de defensivos.','2026-06-24 09:10:00',0,1);
+INSERT INTO `maquina` VALUES (1,1,1,'Trator 01 - John Deere','Trator','John Deere','6100J',2021,'9YZ1234XG1234567','ABC-1234',1250.50,250.00,'Diesel S10',250,500,12.50,'Disponivel','Baixo','2020-01-15',320000.00,NULL,'Trator principal para preparo de solo.','2026-06-23 13:45:24',0,1),(2,1,2,'Colheitadeira Case IH','Colheitadeira','Case IH','250 Series',2023,'H8T5678AB9012345','DEF-5678',450.00,400.00,'Diesel S500',200,300,35.00,'Disponivel','Medio','2023-03-10',890000.00,NULL,'Colheitadeira de alta capacidade para grãos.','2026-06-23 13:45:24',0,1),(3,2,4,'Pulverizador Jacto 3030','Pulverizador','Jacto','Uniport 3030',2020,'P3X9012CD3456789',NULL,3200.80,300.00,'Diesel S10',250,400,18.20,'Em Manutencao','Alto','2020-06-20',450000.00,NULL,'Apresentou falha na bomba hidráulica.','2026-06-23 13:45:24',0,1),(4,2,5,'Trator MF 4275','Trator','Massey Ferguson','4275',2022,'M4F3456EF7890123','GHI-9012',890.30,250.00,'Diesel S10',250,500,13.80,'Disponivel','Baixo','2022-02-10',280000.00,NULL,'Utilizado em operações de plantio direto.','2026-06-24 09:00:00',0,1),(5,3,6,'Colheitadeira NH CR6.90','Colheitadeira','New Holland','CR6.90',2024,'N5H7890GH1234567','JKL-3456',120.00,450.00,'Diesel S500',200,300,40.50,'Em Operacao','Medio','2024-01-05',950000.00,NULL,'Colheitadeira nova para a safra de café.','2026-06-24 09:05:00',0,1),(6,3,7,'Pulverizador Stara','Pulverizador','Stara','Imperador 3.0',2021,'S6T1234IJ5678901',NULL,2100.60,350.00,'Diesel S10',250,400,17.90,'Disponivel','Baixo','2021-05-15',520000.00,NULL,'Pulverizador para aplicação de defensivos.','2026-06-24 09:10:00',0,1);
 /*!40000 ALTER TABLE `maquina` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `maquina_combustivel`
+--
+
+DROP TABLE IF EXISTS `maquina_combustivel`;
+CREATE TABLE `maquina_combustivel` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `id_maquina` int NOT NULL,
+  `tipo_combustivel` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_maquina` (`id_maquina`),
+  CONSTRAINT `maquina_combustivel_ibfk_1` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+LOCK TABLES `maquina_combustivel` WRITE;
+INSERT INTO `maquina_combustivel` (`id_maquina`, `tipo_combustivel`) VALUES
+(1,'Diesel S10'),
+(2,'Diesel S500'),
+(3,'Diesel S10'),
+(4,'Diesel S10'),
+(5,'Diesel S500'),
+(6,'Diesel S10');
 UNLOCK TABLES;
 
 --
@@ -186,6 +210,7 @@ CREATE TABLE `notificacao` (
   `id_notificacao` int NOT NULL AUTO_INCREMENT,
   `id_usuario` int NOT NULL,
   `id_maquina` int DEFAULT NULL,
+  `id_ordem_manutencao` int DEFAULT NULL,
   `tipo` varchar(50) NOT NULL,
   `mensagem` text NOT NULL,
   `lida` tinyint(1) DEFAULT '0',
@@ -193,8 +218,10 @@ CREATE TABLE `notificacao` (
   PRIMARY KEY (`id_notificacao`),
   KEY `id_usuario` (`id_usuario`),
   KEY `id_maquina` (`id_maquina`),
+  KEY `id_ordem_manutencao` (`id_ordem_manutencao`),
   CONSTRAINT `notificacao_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
-  CONSTRAINT `notificacao_ibfk_2` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE SET NULL
+  CONSTRAINT `notificacao_ibfk_2` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE SET NULL,
+  CONSTRAINT `notificacao_ibfk_3` FOREIGN KEY (`id_ordem_manutencao`) REFERENCES `ordem_manutencao` (`id_ordem`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -204,7 +231,13 @@ CREATE TABLE `notificacao` (
 
 LOCK TABLES `notificacao` WRITE;
 /*!40000 ALTER TABLE `notificacao` DISABLE KEYS */;
-INSERT INTO `notificacao` VALUES (1,1,1,'Preventivo','O Trator John Deere está se aproximando do limite de quilometragem para a próxima revisão (faltam 50km).',0,'2026-06-23 13:45:33'),(2,1,2,'Aprovacao','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira Case IH.',0,'2026-06-23 13:45:33'),(3,2,3,'Anomalia','Falha crítica registrada no Pulverizador Jacto. Máquina marcada como Inativa/Em Manutenção.',1,'2026-06-23 13:45:33'),(4,6,5,'Aprovacao','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira New Holland.',0,'2026-06-24 11:05:00'),(5,4,4,'Preventivo','O Trator Massey Ferguson está se aproximando do limite de quilometragem para a próxima revisão (faltam 30km).',0,'2026-06-24 11:10:00'),(6,5,6,'Risco','Pulverizador Stara apresenta risco elevado devido à verificação pendente do sistema hidráulico.',0,'2026-06-24 11:15:00');
+INSERT INTO `notificacao` (`id_notificacao`,`id_usuario`,`id_maquina`,`id_ordem_manutencao`,`tipo`,`mensagem`,`lida`,`data_criacao`) VALUES
+(1,1,1,NULL,'alerta_preventivo','O Trator John Deere está se aproximando do limite de quilometragem para a próxima revisão (faltam 50km).',0,'2026-06-23 13:45:33'),
+(2,1,2,2,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira Case IH.',0,'2026-06-23 13:45:33'),
+(3,2,3,3,'anomalia','Falha crítica registrada no Pulverizador Jacto. Máquina marcada como Inativa/Em Manutenção.',1,'2026-06-23 13:45:33'),
+(4,6,5,5,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira New Holland.',0,'2026-06-24 11:05:00'),
+(5,4,4,NULL,'alerta_preventivo','O Trator Massey Ferguson está se aproximando do limite de quilometragem para a próxima revisão (faltam 30km).',0,'2026-06-24 11:10:00'),
+(6,5,6,6,'anomalia','Pulverizador Stara apresenta risco elevado devido à verificação pendente do sistema hidráulico.',0,'2026-06-24 11:15:00');
 /*!40000 ALTER TABLE `notificacao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -341,7 +374,7 @@ CREATE TABLE `usuario_maquina` (
 
 LOCK TABLES `usuario_maquina` WRITE;
 /*!40000 ALTER TABLE `usuario_maquina` DISABLE KEYS */;
-INSERT INTO `usuario_maquina` VALUES (2,1),(3,2),(2,3),(4,4),(5,5),(6,6);
+INSERT INTO `usuario_maquina` VALUES (2,1),(3,2),(2,3),(4,4),(4,5),(6,6);
 /*!40000 ALTER TABLE `usuario_maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

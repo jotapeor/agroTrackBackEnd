@@ -44,6 +44,15 @@ public class UserController {
         return Map.of("disponivel", !userService.emailExiste(email));
     }
 
+    @GetMapping("/usuarios/email-disponivel")
+    public Map<String, Boolean> emailDisponivel(
+            @RequestParam("email") String email,
+            @RequestParam(value = "idAtual", required = false) Long idAtual) {
+        Usuario existente = userRepository.findByEmail(email.trim());
+        boolean disponivel = (existente == null || (idAtual != null && existente.getId_usuario().equals(idAtual)));
+        return Map.of("disponivel", disponivel);
+    }
+
     @PostMapping("/autenticar/alterar-senha")
     public String alterarSenha(@RequestBody Map<String, String> body, @RequestHeader("Authorization") String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer "))

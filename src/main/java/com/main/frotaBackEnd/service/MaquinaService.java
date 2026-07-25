@@ -3,9 +3,11 @@ package com.main.frotaBackEnd.service;
 import com.main.frotaBackEnd.model.Fazenda;
 import com.main.frotaBackEnd.model.Maquina;
 import com.main.frotaBackEnd.model.MaquinaDTO;
+import com.main.frotaBackEnd.model.MaquinaCombustivel;
 import com.main.frotaBackEnd.model.Talhao;
 import com.main.frotaBackEnd.repository.FazendaRepository;
 import com.main.frotaBackEnd.repository.MaquinaRepository;
+import com.main.frotaBackEnd.repository.MaquinaCombustivelRepository;
 import com.main.frotaBackEnd.repository.TalhaoRepository;
 import com.main.frotaBackEnd.repository.AutorizacaoRiscoRepository;
 import com.main.frotaBackEnd.repository.UserRepository;
@@ -53,13 +55,16 @@ public class MaquinaService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private MaquinaCombustivelRepository maquinaCombustivelRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
 
     @Value("${app.upload.dir:uploads/maquinas}")
     private String uploadDir;
 
-    public void cadastrar(MaquinaDTO dto, MultipartFile foto) {
+    public void cadastrar(MaquinaDTO dto, List<String> combustivelExtra, MultipartFile foto) {
         if (dto.getNome() == null || dto.getNome().trim().length() < 2)
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Insira um nome/apelido para a máquina (mínimo 2 caracteres).");
         if (dto.getTipo() == null || (!dto.getTipo().equals("Trator") && !dto.getTipo().equals("Colheitadeira") && !dto.getTipo().equals("Pulverizador") && !dto.getTipo().equals("Semeadeira")))
@@ -119,6 +124,14 @@ public class MaquinaService {
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Erro interno ao salvar a máquina.");
         }
+
+        if (combustivelExtra != null) {
+            for (String tipo : combustivelExtra) {
+                if (tipo != null && !tipo.isBlank()) {
+                    maquinaCombustivelRepository.save(new MaquinaCombustivel(maquina, tipo));
+                }
+            }
+        }
     }
 
     public List<MaquinaDTO> listarTodas() {
@@ -139,7 +152,8 @@ public class MaquinaService {
         return toDTO(maquina);
     }
 
-    public void atualizar(Long id, MaquinaDTO dto, MultipartFile foto) {
+    @Transactional
+    public void atualizar(Long id, MaquinaDTO dto, List<String> combustivelExtra, MultipartFile foto) {
         Maquina maquina = maquinaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
 
@@ -196,6 +210,34 @@ public class MaquinaService {
             maquinaRepository.save(maquina);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Erro interno ao atualizar a máquina.");
+        }
+
+        maquinaCombustivelRepository.deleteByMaquina_Id(id);
+        if (combustivelExtra != null) {
+            for (String tipo : combustivelExtra) {
+                if (tipo != null && !tipo.isBlank()) {
+                    maquinaCombustivelRepository.save(new MaquinaCombustivel(maquina, tipo));
+                }
+            }
+        }
+    }
+
+    public List<MaquinaDTO> listarArquivadas() {
+        return maquinaRepository.buscarArquivadas().stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    @Transactional
+    public void reativar(Long id) {
+        Maquina maquina = maquinaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
+        maquina.setAtivo(true);
+        maquina.setStatus("Disponivel");
+        try {
+            maquinaRepository.save(maquina);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Erro interno ao reativar a máquina.");
         }
     }
 

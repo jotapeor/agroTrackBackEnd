@@ -62,8 +62,11 @@ public class ManutencaoService {
         ordem = ordemManutencaoRepository.save(ordem);
 
         if ("Aguardando Aprovação".equals(status)) {
-            gerarNotificacaoProprietario("ordem_pendente", "Nova ordem de manutenção aberta por " + usuario.getNome() + " para a máquina " + maquina.getNome() + " aguardando aprovação.");
+            gerarNotificacaoProprietarioComOrdem(ordem, "ordem_pendente",
+                "Nova ordem de manutenção aberta por " + usuario.getNome() + " para a máquina " + maquina.getNome() + " aguardando aprovação.");
         }
+
+        classificacaoRiscoService.recalcularRisco(maquina);
 
         return toDTO(ordem);
     }
@@ -84,6 +87,7 @@ public class ManutencaoService {
         n.setUsuarioDestinatario(ordem.getAbertaPor());
         n.setTipo(aprovada ? "ordem_aprovada" : "ordem_recusada");
         n.setMensagem("Sua ordem de manutenção para a máquina " + ordem.getMaquina().getNome() + " foi " + (aprovada ? "aprovada" : "recusada") + ".");
+        n.setOrdemManutencao(ordem);
         n.setLida(false);
         n.setDataCriacao(LocalDateTime.now());
         notificacaoRepository.save(n);
@@ -111,6 +115,17 @@ public class ManutencaoService {
         ordem = ordemManutencaoRepository.save(ordem);
 
         classificacaoRiscoService.recalcularRisco(ordem.getMaquina());
+
+        if (!"PROPRIETARIO".equals(ordem.getAbertaPor().getPerfil())) {
+            Notificacao n = new Notificacao();
+            n.setUsuarioDestinatario(ordem.getAbertaPor());
+            n.setTipo("ordem_aprovada");
+            n.setMensagem("A ordem de manutenção para a máquina " + ordem.getMaquina().getNome() + " foi encerrada.");
+            n.setOrdemManutencao(ordem);
+            n.setLida(false);
+            n.setDataCriacao(LocalDateTime.now());
+            notificacaoRepository.save(n);
+        }
 
         return toDTO(ordem);
     }
@@ -145,12 +160,17 @@ public class ManutencaoService {
         return ordemManutencaoRepository.findAll().stream()
                 .filter(o -> !o.isRemovidaDaAba())
                 .filter(o -> idsMaquinasVinculadas.contains(o.getMaquina().getId()))
+                .filter(o -> o.getMaquina().isAtivo())
                 .sorted((a, b) -> b.getDataAbertura().compareTo(a.getDataAbertura()))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     private void gerarNotificacaoProprietario(String tipo, String mensagem) {
+        gerarNotificacaoProprietarioComOrdem(null, tipo, mensagem);
+    }
+
+    private void gerarNotificacaoProprietarioComOrdem(OrdemManutencao ordem, String tipo, String mensagem) {
         List<Usuario> proprietarios = userRepository.findAll().stream()
                 .filter(u -> "PROPRIETARIO".equals(u.getPerfil()))
                 .toList();
@@ -160,6 +180,7 @@ public class ManutencaoService {
             n.setUsuarioDestinatario(p);
             n.setTipo(tipo);
             n.setMensagem(mensagem);
+            n.setOrdemManutencao(ordem);
             n.setLida(false);
             n.setDataCriacao(LocalDateTime.now());
             notificacaoRepository.save(n);

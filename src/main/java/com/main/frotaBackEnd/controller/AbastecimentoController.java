@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.Map;
 
@@ -23,6 +24,7 @@ public class AbastecimentoController {
     @Autowired
     private TokenService tokenService;
 
+    @PreAuthorize("hasAnyRole('PROPRIETARIO', 'SOCIO', 'OPERADOR')")
     @PostMapping("/maquina/{idMaquina}")
     public ResponseEntity<?> registrarAbastecimento(
             @PathVariable Long idMaquina,

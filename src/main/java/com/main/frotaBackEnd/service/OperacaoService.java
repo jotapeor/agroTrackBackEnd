@@ -64,11 +64,26 @@ public class OperacaoService {
             }
         }
 
+        if (!"PROPRIETARIO".equals(perfilUsuario) && !"SOCIO".equals(perfilUsuario)) {
+            List<RegistroOperacao> operacoesAtivas = registroOperacaoRepository.buscarOperacoesAtivas(idMaquina);
+            if (!operacoesAtivas.isEmpty()) {
+                RegistroOperacao opAberta = operacoesAtivas.get(0);
+                if (!opAberta.getOperador().getId_usuario().equals(idUsuarioLogado)) {
+                    throw new ResponseStatusException(HttpStatusCode.valueOf(403),
+                        "Esta máquina já está em operação por outro colaborador.");
+                }
+            }
+        }
+
         String statusAtual = maquina.getStatus();
         String novoStatus = dto.getNovoStatus();
 
         if (novoStatus.equals(statusAtual)) {
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A máquina já está neste status.");
+        }
+
+        if ("Em Manutencao".equals(statusAtual) && "Em Operacao".equals(novoStatus)) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Não é possível entrar em operação enquanto a máquina está em manutenção.");
         }
 
         RegistroOperacaoDTO resumo = null;
@@ -104,13 +119,13 @@ public class OperacaoService {
             if (dto.getHodometroFim() == null) {
                 throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Hodômetro final é obrigatório ao encerrar uma operação.");
             }
-            if (dto.getHodometroFim().compareTo(maquina.getHodometroInicial()) < 0) {
-                throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Hodômetro final não pode ser menor que o inicial.");
-            }
 
             List<RegistroOperacao> ativas = registroOperacaoRepository.buscarOperacoesAtivas(idMaquina);
             if (!ativas.isEmpty()) {
                 RegistroOperacao registro = ativas.get(0);
+                if (dto.getHodometroFim().compareTo(registro.getHodometroInicio()) < 0) {
+                    throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Hodômetro final não pode ser menor que o hodômetro de início da operação.");
+                }
                 registro.setDataFim(LocalDateTime.now());
                 registro.setHodometroFim(dto.getHodometroFim());
                 registro.setObservacoes(dto.getObservacoes());

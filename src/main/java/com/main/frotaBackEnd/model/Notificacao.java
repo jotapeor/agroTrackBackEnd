@@ -21,6 +21,10 @@ public class Notificacao {
     @JoinColumn(name = "id_maquina")
     private Maquina maquina;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_ordem_manutencao")
+    private OrdemManutencao ordemManutencao;
+
     @Column(nullable = false)
     private String tipo;
 
@@ -58,6 +62,14 @@ public class Notificacao {
 
     public void setMaquina(Maquina maquina) {
         this.maquina = maquina;
+    }
+
+    public OrdemManutencao getOrdemManutencao() {
+        return ordemManutencao;
+    }
+
+    public void setOrdemManutencao(OrdemManutencao ordemManutencao) {
+        this.ordemManutencao = ordemManutencao;
     }
 
     public String getTipo() {

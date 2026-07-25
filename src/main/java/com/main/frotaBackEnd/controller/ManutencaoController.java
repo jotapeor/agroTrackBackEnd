@@ -23,6 +23,7 @@ public class ManutencaoController {
     @Autowired
     private ManutencaoService manutencaoService;
 
+    @PreAuthorize("hasAnyRole('PROPRIETARIO', 'SOCIO', 'OPERADOR')")
     @PostMapping("/maquina/{idMaquina}/ordens")
     public ResponseEntity<OrdemManutencaoDTO> abrirOrdem(
             @PathVariable Long idMaquina,
@@ -57,6 +58,7 @@ public class ManutencaoController {
         return ResponseEntity.ok(Map.of("message", "Ordem removida da aba com sucesso!"));
     }
 
+    @PreAuthorize("hasAnyRole('PROPRIETARIO', 'SOCIO', 'OPERADOR')")
     @GetMapping("/ordens")
     public ResponseEntity<List<OrdemManutencaoDTO>> listarOrdens() {
         UsuarioDTO user = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();

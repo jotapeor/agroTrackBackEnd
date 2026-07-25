@@ -2,9 +2,11 @@ package com.main.frotaBackEnd.service;
 
 import com.main.frotaBackEnd.model.Maquina;
 import com.main.frotaBackEnd.model.PerfilUsuario;
+import com.main.frotaBackEnd.model.RegistroOperacao;
 import com.main.frotaBackEnd.model.Usuario;
 import com.main.frotaBackEnd.model.UsuarioDTO;
 import com.main.frotaBackEnd.repository.MaquinaRepository;
+import com.main.frotaBackEnd.repository.RegistroOperacaoRepository;
 import com.main.frotaBackEnd.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +14,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,6 +36,9 @@ public class ProprietarioService {
     private MaquinaRepository maquinaRepository;
 
     @Autowired
+    private RegistroOperacaoRepository registroOperacaoRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Value("${app.upload.dir.usuarios:uploads/usuarios}")
@@ -45,8 +49,8 @@ public class ProprietarioService {
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Insira um nome válido (mínimo de 3 letras).");
         if (email == null || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$"))
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Insira um e-mail válido.");
-        if (senha == null || senha.isBlank())
-            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A senha não pode ser vazia.");
+        if (senha == null || senha.isBlank() || senha.length() < 6)
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A senha deve ter no mínimo 6 caracteres.");
         if (userRepository.emailExiste(email))
             throw new ResponseStatusException(HttpStatusCode.valueOf(409), "E-mail já cadastrado");
 
@@ -125,6 +129,27 @@ public class ProprietarioService {
 
         if (PerfilUsuario.SOCIO.equals(solicitante.getPerfil()) && !PerfilUsuario.OPERADOR.equals(usuario.getPerfil()))
             throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Você só pode vincular máquinas a operadores.");
+
+        List<Long> idsAtualmente = usuario.getMaquinas().stream()
+                .map(Maquina::getId)
+                .collect(Collectors.toList());
+        List<Long> novosIds = idsMaquinas != null ? idsMaquinas : List.of();
+        List<Long> sendoRemovidos = idsAtualmente.stream()
+                .filter(mid -> !novosIds.contains(mid))
+                .collect(Collectors.toList());
+
+        if (!sendoRemovidos.isEmpty()) {
+            List<RegistroOperacao> abertas = registroOperacaoRepository
+                    .buscarOperacoesAbertasPorMaquinasEUsuario(sendoRemovidos, idUsuario);
+            if (!abertas.isEmpty()) {
+                String nomes = abertas.stream()
+                        .map(r -> r.getMaquina().getNome())
+                        .distinct()
+                        .collect(Collectors.joining(", "));
+                throw new ResponseStatusException(HttpStatusCode.valueOf(409),
+                        "Não é possível desvincular o operador de máquina(s) com operação em andamento: " + nomes);
+            }
+        }
 
         usuario.getMaquinas().clear();
 

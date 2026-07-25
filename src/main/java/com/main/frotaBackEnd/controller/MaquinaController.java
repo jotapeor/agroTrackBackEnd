@@ -42,6 +42,9 @@ public class MaquinaController {
     private com.main.frotaBackEnd.repository.UserRepository userRepository;
 
     @Autowired
+    private com.main.frotaBackEnd.repository.MaquinaCombustivelRepository maquinaCombustivelRepository;
+
+    @Autowired
     private com.main.frotaBackEnd.service.HistoricoMaquinaService historicoMaquinaService;
 
     @PreAuthorize("hasRole('PROPRIETARIO')")
@@ -57,6 +60,7 @@ public class MaquinaController {
             @RequestParam(value = "placa", required = false) String placa,
             @RequestParam(value = "capacidade_tanque", required = false) String capacidadeTanque,
             @RequestParam(value = "tipo_combustivel", required = false) String tipoCombustivel,
+            @RequestParam(value = "combustivel_extra", required = false) List<String> combustivelExtra,
             @RequestParam(value = "intervalo_troca_oleo_horas", required = false) String intervaloTrocaOleo,
             @RequestParam(value = "intervalo_inspecao_horas", required = false) String intervaloInspecao,
             @RequestParam(value = "consumo_medio", required = false) String consumoMedio,
@@ -103,7 +107,7 @@ public class MaquinaController {
             dto.setValorAquisicao(new java.math.BigDecimal(valorAquisicao));
         dto.setObservacoes(observacoes);
 
-        maquinaService.cadastrar(dto, foto);
+        maquinaService.cadastrar(dto, combustivelExtra, foto);
         return ResponseEntity.ok(Map.of("message", "Máquina cadastrada com sucesso!"));
     }
 
@@ -135,6 +139,7 @@ public class MaquinaController {
             @RequestParam(value = "placa", required = false) String placa,
             @RequestParam(value = "capacidade_tanque", required = false) String capacidadeTanque,
             @RequestParam(value = "tipo_combustivel", required = false) String tipoCombustivel,
+            @RequestParam(value = "combustivel_extra", required = false) List<String> combustivelExtra,
             @RequestParam(value = "intervalo_troca_oleo_horas", required = false) String intervaloTrocaOleo,
             @RequestParam(value = "intervalo_inspecao_horas", required = false) String intervaloInspecao,
             @RequestParam(value = "consumo_medio", required = false) String consumoMedio,
@@ -182,7 +187,7 @@ public class MaquinaController {
             dto.setValorAquisicao(new java.math.BigDecimal(valorAquisicao));
         dto.setObservacoes(observacoes);
 
-        maquinaService.atualizar(id, dto, foto);
+        maquinaService.atualizar(id, dto, combustivelExtra, foto);
         return ResponseEntity.ok(Map.of("message", "Máquina atualizada com sucesso!"));
     }
 
@@ -191,6 +196,37 @@ public class MaquinaController {
     public ResponseEntity<Map<String, String>> excluir(@PathVariable Long id) {
         maquinaService.excluir(id);
         return ResponseEntity.ok(Map.of("message", "Máquina arquivada com sucesso!"));
+    }
+
+    @PreAuthorize("hasRole('PROPRIETARIO')")
+    @GetMapping("/arquivadas")
+    public ResponseEntity<List<MaquinaDTO>> listarArquivadas() {
+        return ResponseEntity.ok(maquinaService.listarArquivadas());
+    }
+
+    @PreAuthorize("hasRole('PROPRIETARIO')")
+    @PostMapping("/{id}/reativar")
+    public ResponseEntity<Map<String, String>> reativar(@PathVariable Long id) {
+        maquinaService.reativar(id);
+        return ResponseEntity.ok(Map.of("message", "Máquina reativada com sucesso!"));
+    }
+
+    @GetMapping("/{id}/combustiveis")
+    public ResponseEntity<List<String>> listarCombustiveis(@PathVariable Long id) {
+        com.main.frotaBackEnd.model.Maquina m = maquinaRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
+        List<String> extras = maquinaCombustivelRepository.findTiposByMaquinaId(id);
+        if (extras.isEmpty()) {
+            List<String> tipos = new java.util.ArrayList<>();
+            if (m.getTipoCombustivel() != null && !m.getTipoCombustivel().isBlank())
+                tipos.add(m.getTipoCombustivel());
+            return ResponseEntity.ok(tipos);
+        }
+        List<String> todos = new java.util.ArrayList<>();
+        if (m.getTipoCombustivel() != null && !m.getTipoCombustivel().isBlank() && !extras.contains(m.getTipoCombustivel()))
+            todos.add(m.getTipoCombustivel());
+        todos.addAll(extras);
+        return ResponseEntity.ok(todos);
     }
 
     @GetMapping("/fazendas")

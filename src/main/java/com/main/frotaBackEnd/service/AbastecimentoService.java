@@ -123,7 +123,7 @@ public class AbastecimentoService {
             BigDecimal proxima = ultimoPonto.add(intervalo);
 
             if (proxima.subtract(hodometroAtual).compareTo(new BigDecimal("20")) <= 0) {
-                gerarNotificacaoProprietario("alerta_preventivo", "Máquina " + maquina.getNome() + " próxima da troca de óleo. Hodômetro: " + hodometroAtual);
+                gerarNotificacaoProprietario("alerta_preventivo", "Máquina " + maquina.getNome() + " próxima da troca de óleo. Hodômetro: " + hodometroAtual, maquina);
             }
         }
         if (maquina.getIntervaloInspecaoHoras() != null && maquina.getIntervaloInspecaoHoras() > 0) {
@@ -133,21 +133,36 @@ public class AbastecimentoService {
             BigDecimal proxima = ultimoPonto.add(intervalo);
 
             if (proxima.subtract(hodometroAtual).compareTo(new BigDecimal("20")) <= 0) {
-                gerarNotificacaoProprietario("alerta_preventivo", "Máquina " + maquina.getNome() + " próxima da inspeção. Hodômetro: " + hodometroAtual);
+                gerarNotificacaoProprietario("alerta_preventivo", "Máquina " + maquina.getNome() + " próxima da inspeção. Hodômetro: " + hodometroAtual, maquina);
             }
         }
     }
 
     private void gerarNotificacaoProprietario(String tipo, String mensagem) {
+        gerarNotificacaoProprietario(tipo, mensagem, null);
+    }
+
+    private void gerarNotificacaoProprietario(String tipo, String mensagem, Maquina maquina) {
         List<Usuario> proprietarios = userRepository.findAll().stream()
                 .filter(u -> "PROPRIETARIO".equals(u.getPerfil()))
                 .toList();
 
+        LocalDateTime limite = LocalDateTime.now().minusHours(24);
+
         for (Usuario p : proprietarios) {
+            if (maquina != null) {
+                List<Notificacao> recentes = notificacaoRepository.buscarPorMaquinaId(maquina.getId());
+                boolean jaExiste = recentes.stream().anyMatch(n ->
+                    tipo.equals(n.getTipo()) &&
+                    n.getUsuarioDestinatario().getId_usuario().equals(p.getId_usuario()) &&
+                    n.getDataCriacao() != null && n.getDataCriacao().isAfter(limite));
+                if (jaExiste) continue;
+            }
             Notificacao n = new Notificacao();
             n.setUsuarioDestinatario(p);
             n.setTipo(tipo);
             n.setMensagem(mensagem);
+            n.setMaquina(maquina);
             n.setLida(false);
             n.setDataCriacao(LocalDateTime.now());
             notificacaoRepository.save(n);

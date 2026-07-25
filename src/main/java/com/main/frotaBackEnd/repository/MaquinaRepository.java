@@ -17,4 +17,7 @@ public interface MaquinaRepository extends JpaRepository<Maquina, Long> {
 
     @Query("select m from Maquina m where m.ativo = true and m.status = 'Em Operacao' order by m.nome asc")
     List<Maquina> buscarEmOperacao();
+
+    @Query("select m from Maquina m where m.ativo = false order by m.dataCadastro desc")
+    List<Maquina> buscarArquivadas();
 }

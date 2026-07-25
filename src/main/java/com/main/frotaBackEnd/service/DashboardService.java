@@ -3,9 +3,11 @@ package com.main.frotaBackEnd.service;
 import com.main.frotaBackEnd.model.DashboardDTO;
 import com.main.frotaBackEnd.model.Maquina;
 import com.main.frotaBackEnd.model.Notificacao;
+import com.main.frotaBackEnd.model.RegistroOperacao;
 import com.main.frotaBackEnd.model.Usuario;
 import com.main.frotaBackEnd.repository.MaquinaRepository;
 import com.main.frotaBackEnd.repository.NotificacaoRepository;
+import com.main.frotaBackEnd.repository.RegistroOperacaoRepository;
 import com.main.frotaBackEnd.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -31,6 +33,9 @@ public class DashboardService {
 
     @Autowired
     private NotificacaoRepository notificacaoRepository;
+
+    @Autowired
+    private RegistroOperacaoRepository registroOperacaoRepository;
 
     public DashboardDTO obterDadosDashboard(Long idUsuarioLogado, String perfilUsuario) {
         List<Maquina> maquinas;
@@ -76,6 +81,16 @@ public class DashboardService {
         dto.setMaquinasRiscoAlto(maquinasRiscoAlto);
 
         dto.setNotificacoesRecentes(notificacaoService.listarPorUsuario(idUsuarioLogado).stream().limit(5).collect(Collectors.toList()));
+
+        List<RegistroOperacao> opAberta = registroOperacaoRepository.buscarOperacaoAbertaPorUsuario(idUsuarioLogado);
+        if (!opAberta.isEmpty()) {
+            RegistroOperacao op = opAberta.get(0);
+            Map<String, Object> opMap = new HashMap<>();
+            opMap.put("idMaquina", op.getMaquina().getId());
+            opMap.put("nomeMaquina", op.getMaquina().getNome());
+            opMap.put("dataInicio", op.getDataInicio().toString());
+            dto.setOperacaoAtiva(opMap);
+        }
 
         return dto;
     }

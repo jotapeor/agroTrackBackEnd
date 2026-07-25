@@ -8,6 +8,7 @@ public class DashboardDTO {
     private long alertasAtivos;
     private long maquinasRiscoAlto;
     private List<NotificacaoDTO> notificacoesRecentes;
+    private Map<String, Object> operacaoAtiva;
 
     public Map<String, Long> getMaquinasPorStatus() { return maquinasPorStatus; }
     public void setMaquinasPorStatus(Map<String, Long> maquinasPorStatus) { this.maquinasPorStatus = maquinasPorStatus; }
@@ -17,4 +18,6 @@ public class DashboardDTO {
     public void setMaquinasRiscoAlto(long maquinasRiscoAlto) { this.maquinasRiscoAlto = maquinasRiscoAlto; }
     public List<NotificacaoDTO> getNotificacoesRecentes() { return notificacoesRecentes; }
     public void setNotificacoesRecentes(List<NotificacaoDTO> notificacoesRecentes) { this.notificacoesRecentes = notificacoesRecentes; }
+    public Map<String, Object> getOperacaoAtiva() { return operacaoAtiva; }
+    public void setOperacaoAtiva(Map<String, Object> operacaoAtiva) { this.operacaoAtiva = operacaoAtiva; }
 }

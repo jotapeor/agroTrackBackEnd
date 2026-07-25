@@ -37,6 +37,18 @@ public class NotificacaoService {
         notificacaoRepository.save(notificacao);
     }
 
+    @Transactional
+    public void remover(Long idNotificacao, Long idUsuarioLogado) {
+        Notificacao notificacao = notificacaoRepository.findById(idNotificacao)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Notificação não encontrada."));
+
+        if (!notificacao.getUsuarioDestinatario().getId_usuario().equals(idUsuarioLogado)) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Você não pode remover uma notificação de outro usuário.");
+        }
+
+        notificacaoRepository.delete(notificacao);
+    }
+
     private NotificacaoDTO toDTO(Notificacao n) {
         NotificacaoDTO dto = new NotificacaoDTO();
         dto.setId(n.getId());
@@ -44,6 +56,12 @@ public class NotificacaoService {
         dto.setMensagem(n.getMensagem());
         dto.setLida(n.isLida());
         dto.setDataCriacao(n.getDataCriacao());
+        if (n.getOrdemManutencao() != null) {
+            dto.setIdOrdem(n.getOrdemManutencao().getId());
+            dto.setDescricaoOrdem(n.getOrdemManutencao().getDescricao());
+            dto.setPrioridadeOrdem(n.getOrdemManutencao().getPrioridade());
+            dto.setStatusOrdem(n.getOrdemManutencao().getStatus());
+        }
         return dto;
     }
 }
