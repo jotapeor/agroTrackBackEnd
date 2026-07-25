@@ -1,4 +1,4 @@
-# AgroTrack Backend
+# AgroTrack BackEnd
 
 REST API for AgroTrack, an agricultural fleet management system developed as an undergraduate thesis project (TCC). Companion service for the [AgroTrack Frontend](https://github.com/jotapeor/agroTrackFrontEnd).
 
