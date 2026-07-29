@@ -39,6 +39,9 @@ public class RegistroOperacao {
 
     private String observacoes;
 
+    @Column(name = "peso_final")
+    private BigDecimal pesoFinal;
+
     public RegistroOperacao() {
     }
 
@@ -112,5 +115,13 @@ public class RegistroOperacao {
 
     public void setObservacoes(String observacoes) {
         this.observacoes = observacoes;
+    }
+
+    public BigDecimal getPesoFinal() {
+        return pesoFinal;
+    }
+
+    public void setPesoFinal(BigDecimal pesoFinal) {
+        this.pesoFinal = pesoFinal;
     }
 }

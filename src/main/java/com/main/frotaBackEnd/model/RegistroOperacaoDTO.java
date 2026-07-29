@@ -17,6 +17,7 @@ public class RegistroOperacaoDTO {
     private String observacoes;
     private BigDecimal horasOperadas;
     private BigDecimal kmRodados;
+    private BigDecimal pesoFinal;
     private BigDecimal consumoEstimadoOperacao;
     private java.util.List<NotificacaoDTO> alertasGerados;
 
@@ -48,6 +49,8 @@ public class RegistroOperacaoDTO {
     public void setHorasOperadas(BigDecimal horasOperadas) { this.horasOperadas = horasOperadas; }
     public BigDecimal getKmRodados() { return kmRodados; }
     public void setKmRodados(BigDecimal kmRodados) { this.kmRodados = kmRodados; }
+    public BigDecimal getPesoFinal() { return pesoFinal; }
+    public void setPesoFinal(BigDecimal pesoFinal) { this.pesoFinal = pesoFinal; }
     public BigDecimal getConsumoEstimadoOperacao() { return consumoEstimadoOperacao; }
     public void setConsumoEstimadoOperacao(BigDecimal consumoEstimadoOperacao) { this.consumoEstimadoOperacao = consumoEstimadoOperacao; }
     public java.util.List<NotificacaoDTO> getAlertasGerados() { return alertasGerados; }

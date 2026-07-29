@@ -85,6 +85,14 @@ public class ProprietarioController {
     public ResponseEntity<Map<String, String>> excluirColaborador(
             @PathVariable Long id) {
         proprietarioService.excluirColaborador(id);
-        return ResponseEntity.ok(Map.of("message", "Colaborador excluído com sucesso!"));
+        return ResponseEntity.ok(Map.of("message", "Colaborador desativado com sucesso!"));
+    }
+
+    @PreAuthorize("hasRole('PROPRIETARIO')")
+    @PostMapping("/colaboradores/{id}/reativar")
+    public ResponseEntity<Map<String, String>> reativarColaborador(
+            @PathVariable Long id) {
+        proprietarioService.reativarColaborador(id);
+        return ResponseEntity.ok(Map.of("message", "Colaborador reativado com sucesso!"));
     }
 }

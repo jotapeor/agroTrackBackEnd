@@ -294,6 +294,7 @@ CREATE TABLE `registro_operacao` (
   `hodometro_fim` decimal(10,2) DEFAULT NULL,
   `peso_carregado` decimal(8,2) DEFAULT NULL,
   `observacoes` text,
+  `peso_final` decimal(10,2) DEFAULT NULL,
   PRIMARY KEY (`id_operacao`),
   KEY `id_maquina` (`id_maquina`),
   KEY `id_usuario` (`id_usuario`),
@@ -308,7 +309,7 @@ CREATE TABLE `registro_operacao` (
 
 LOCK TABLES `registro_operacao` WRITE;
 /*!40000 ALTER TABLE `registro_operacao` DISABLE KEYS */;
-INSERT INTO `registro_operacao` VALUES (1,1,2,'2026-06-20 07:00:00','2026-06-20 17:00:00',1240.50,1250.50,NULL,'Gradeação do talhão 4.'),(2,2,3,'2026-06-21 06:00:00','2026-06-21 18:00:00',420.00,450.00,15000.00,'Colheita de soja no talhão 2.'),(3,3,2,'2026-06-22 08:00:00',NULL,3200.80,NULL,NULL,'Operação interrompida por falha na bomba de pulverização.'),(4,4,5,'2026-06-24 07:00:00','2026-06-24 16:00:00',870.00,890.30,NULL,'Preparo de solo no talhão 6.'),(5,5,4,'2026-06-24 06:30:00',NULL,100.00,NULL,NULL,'Colheita de milho no talhão 3, em andamento.'),(6,6,6,'2026-06-24 08:00:00','2026-06-24 12:00:00',2080.00,2100.60,NULL,'Aplicação de defensivo no talhão 5.');
+INSERT INTO `registro_operacao` VALUES (1,1,2,'2026-06-20 07:00:00','2026-06-20 17:00:00',1240.50,1250.50,NULL,'Gradeação do talhão 4.',NULL),(2,2,3,'2026-06-21 06:00:00','2026-06-21 18:00:00',420.00,450.00,15000.00,'Colheita de soja no talhão 2.',12500.00),(3,3,2,'2026-06-22 08:00:00',NULL,3200.80,NULL,NULL,'Operação interrompida por falha na bomba de pulverização.',NULL),(4,4,5,'2026-06-24 07:00:00','2026-06-24 16:00:00',870.00,890.30,NULL,'Preparo de solo no talhão 6.',NULL),(5,5,4,'2026-06-24 06:30:00',NULL,100.00,NULL,NULL,'Colheita de milho no talhão 3, em andamento.',NULL),(6,6,6,'2026-06-24 08:00:00','2026-06-24 12:00:00',2080.00,2100.60,NULL,'Aplicação de defensivo no talhão 5.',NULL);
 /*!40000 ALTER TABLE `registro_operacao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -403,6 +404,18 @@ INSERT INTO `notificacao` (`id_usuario`, `id_maquina`, `tipo`, `mensagem`, `data
 (1, 3, 'alerta_preventivo', 'Pulverizador Jacto próximo da troca de óleo. Hodômetro: 3200.80', '2026-07-05 10:00:00', 0),
 (1, 4, 'anomalia', 'Anomalia de consumo detectada no Trator MF 4275. Consumo atual: 20.00, Média: 13.80', '2026-07-10 11:00:00', 0),
 (1, 5, 'alerta_preventivo', 'Colheitadeira NH próxima da inspeção. Hodômetro: 120.00', '2026-07-15 08:30:00', 0);
+
+CREATE TABLE IF NOT EXISTS `historico_status_maquina` (
+    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `id_maquina` INT NOT NULL,
+    `id_usuario` INT NOT NULL,
+    `status_anterior` VARCHAR(50) NOT NULL,
+    `novo_status` VARCHAR(50) NOT NULL,
+    `motivo` TEXT NOT NULL,
+    `data_alteracao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT `fk_hsm_maquina` FOREIGN KEY (`id_maquina`) REFERENCES `maquina`(`id_maquina`),
+    CONSTRAINT `fk_hsm_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario`(`id_usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `telemetria_maquina` (
   `id` bigint NOT NULL AUTO_INCREMENT,

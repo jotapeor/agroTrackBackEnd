@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,14 +16,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
     private final UserRepository userRepository;
+
+    @Value("${api.security.session.inactivity-timeout-ms:1800000}")
+    private long inactivityTimeoutMs;
+
+    private static final ConcurrentHashMap<Long, Instant> lastActivity = new ConcurrentHashMap<>();
 
     public JwtAuthenticationFilter(TokenService tokenService, UserRepository userRepository) {
         this.tokenService = tokenService;
@@ -41,11 +49,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     Optional<Usuario> userOp = userRepository.findById(usuario.getId_usuario());
                     if (userOp.isPresent() && userOp.get().isAtivo()) {
-                        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + usuario.getPerfil().toUpperCase());
-                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                                usuario, null, Collections.singletonList(authority));
+                        Long userId = usuario.getId_usuario();
+                        Instant now = Instant.now();
+                        Instant lastSeen = lastActivity.get(userId);
 
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        if (lastSeen != null && now.toEpochMilli() - lastSeen.toEpochMilli() > inactivityTimeoutMs) {
+                            lastActivity.remove(userId);
+                        } else {
+                            lastActivity.put(userId, now);
+                            SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + usuario.getPerfil().toUpperCase());
+                            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                    usuario, null, Collections.singletonList(authority));
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
+                        }
                     }
                 }
             } catch (Exception e) {

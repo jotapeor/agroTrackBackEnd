@@ -22,7 +22,7 @@ public interface RegistroOperacaoRepository extends JpaRepository<RegistroOperac
     @Query("select r from RegistroOperacao r where r.maquina.id = ?1 and r.dataInicio >= ?2 and r.dataInicio <= ?3")
     List<RegistroOperacao> buscarPorMaquinaIdEIntervalo(Long maquinaId, java.time.LocalDateTime inicio, java.time.LocalDateTime fim);
 
-    @Query("select r from RegistroOperacao r where r.maquina.id in ?1 and r.operador.id_usuario = ?2 and r.dataFim is null")
+    @Query("select r from RegistroOperacao r where r.maquina.id in ?1 and r.operador.id_usuario = ?2 and r.dataFim is null and r.maquina.status = 'Em Operacao'")
     List<RegistroOperacao> buscarOperacoesAbertasPorMaquinasEUsuario(List<Long> maquinaIds, Long usuarioId);
 
     @Query("select r from RegistroOperacao r where r.operador.id_usuario = ?1 and r.dataFim is null order by r.dataInicio desc")
