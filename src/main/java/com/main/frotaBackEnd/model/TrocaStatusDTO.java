@@ -8,6 +8,8 @@ public class TrocaStatusDTO {
     private BigDecimal pesoCarregado;
     private BigDecimal hodometroFim;
     private String observacoes;
+    private String motivo;
+    private BigDecimal pesoFinal;
 
     public TrocaStatusDTO() {}
 
@@ -21,4 +23,8 @@ public class TrocaStatusDTO {
     public void setHodometroFim(BigDecimal hodometroFim) { this.hodometroFim = hodometroFim; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+    public String getMotivo() { return motivo; }
+    public void setMotivo(String motivo) { this.motivo = motivo; }
+    public BigDecimal getPesoFinal() { return pesoFinal; }
+    public void setPesoFinal(BigDecimal pesoFinal) { this.pesoFinal = pesoFinal; }
 }

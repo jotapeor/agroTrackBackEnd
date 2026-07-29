@@ -48,4 +48,14 @@ public class OperacaoController {
 
         return ResponseEntity.ok(operacaoService.listarHistoricoMaquina(idMaquina));
     }
+
+    @PreAuthorize("hasAnyRole('PROPRIETARIO', 'SOCIO', 'OPERADOR')")
+    @GetMapping("/maquina/{idMaquina}/operacao-ativa")
+    public ResponseEntity<RegistroOperacaoDTO> obterOperacaoAtiva(@PathVariable Long idMaquina) {
+        RegistroOperacaoDTO dto = operacaoService.obterOperacaoAtiva(idMaquina);
+        if (dto == null) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Nenhuma operação ativa encontrada.");
+        }
+        return ResponseEntity.ok(dto);
+    }
 }

@@ -9,7 +9,9 @@ import com.main.frotaBackEnd.repository.FazendaRepository;
 import com.main.frotaBackEnd.repository.MaquinaRepository;
 import com.main.frotaBackEnd.repository.MaquinaCombustivelRepository;
 import com.main.frotaBackEnd.repository.TalhaoRepository;
+import com.main.frotaBackEnd.model.RegistroOperacao;
 import com.main.frotaBackEnd.repository.AutorizacaoRiscoRepository;
+import com.main.frotaBackEnd.repository.RegistroOperacaoRepository;
 import com.main.frotaBackEnd.repository.UserRepository;
 import com.main.frotaBackEnd.model.AutorizacaoRisco;
 import jakarta.persistence.EntityManager;
@@ -57,6 +59,9 @@ public class MaquinaService {
 
     @Autowired
     private MaquinaCombustivelRepository maquinaCombustivelRepository;
+
+    @Autowired
+    private RegistroOperacaoRepository registroOperacaoRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -176,7 +181,16 @@ public class MaquinaService {
         maquina.setIntervaloInspecaoHoras(dto.getIntervaloInspecaoHoras());
         maquina.setConsumoMedio(dto.getConsumoMedio());
 
-        if (dto.getStatus() != null) maquina.setStatus(dto.getStatus());
+        if (dto.getStatus() != null) {
+            if ("Em Operacao".equals(maquina.getStatus()) && !dto.getStatus().equals(maquina.getStatus())) {
+                registroOperacaoRepository.buscarOperacoesAtivas(id).forEach(r -> {
+                    r.setDataFim(LocalDateTime.now());
+                    r.setObservacoes("Encerrado automaticamente por mudança direta de status para " + dto.getStatus() + ".");
+                    registroOperacaoRepository.save(r);
+                });
+            }
+            maquina.setStatus(dto.getStatus());
+        }
         if (dto.getNivelRisco() != null) maquina.setNivelRisco(dto.getNivelRisco());
 
         if (dto.getDataAquisicao() != null && !dto.getDataAquisicao().isEmpty()) {
@@ -245,6 +259,12 @@ public class MaquinaService {
     public void excluir(Long id) {
         Maquina maquina = maquinaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Máquina não encontrada."));
+
+        if ("Em Operacao".equals(maquina.getStatus())) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400),
+                "Não é possível arquivar uma máquina que está em operação. Encerre a operação antes de arquivá-la.");
+        }
+
         try {
             maquina.setAtivo(false);
             maquinaRepository.save(maquina);

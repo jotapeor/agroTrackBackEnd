@@ -3,6 +3,7 @@ package com.main.frotaBackEnd.service;
 import com.main.frotaBackEnd.model.*;
 import com.main.frotaBackEnd.repository.AbastecimentoRepository;
 import com.main.frotaBackEnd.repository.AutorizacaoRiscoRepository;
+import com.main.frotaBackEnd.repository.HistoricoStatusMaquinaRepository;
 import com.main.frotaBackEnd.repository.MaquinaRepository;
 import com.main.frotaBackEnd.repository.RegistroOperacaoRepository;
 import com.main.frotaBackEnd.repository.UserRepository;
@@ -48,6 +49,9 @@ public class OperacaoService {
 
     @Autowired
     private com.main.frotaBackEnd.repository.NotificacaoRepository notificacaoRepository;
+
+    @Autowired
+    private HistoricoStatusMaquinaRepository historicoStatusMaquinaRepository;
 
     @Transactional
     public RegistroOperacaoDTO trocarStatus(Long idMaquina, TrocaStatusDTO dto, Long idUsuarioLogado, String perfilUsuario) {
@@ -98,6 +102,26 @@ public class OperacaoService {
 
             if ("Alto".equals(maquina.getNivelRisco())) {
                 if (!maquina.isAutorizadaOperacaoRisco()) {
+                    List<Usuario> proprietarios = userRepository.findAll().stream()
+                            .filter(u -> "PROPRIETARIO".equals(u.getPerfil())).toList();
+                    LocalDateTime limite = LocalDateTime.now().minusHours(24);
+                    for (Usuario p : proprietarios) {
+                        List<Notificacao> recentes = notificacaoRepository.buscarPorMaquinaId(maquina.getId());
+                        boolean jaExiste = recentes.stream().anyMatch(n ->
+                                "bloqueio_risco".equals(n.getTipo()) &&
+                                n.getUsuarioDestinatario().getId_usuario().equals(p.getId_usuario()) &&
+                                n.getDataCriacao() != null && n.getDataCriacao().isAfter(limite));
+                        if (!jaExiste) {
+                            Notificacao notif = new Notificacao();
+                            notif.setUsuarioDestinatario(p);
+                            notif.setTipo("bloqueio_risco");
+                            notif.setMensagem("A operação da máquina " + maquina.getNome() + " foi bloqueada por nível de risco ALTO. É necessária autorização prévia.");
+                            notif.setMaquina(maquina);
+                            notif.setLida(false);
+                            notif.setDataCriacao(LocalDateTime.now());
+                            notificacaoRepository.save(notif);
+                        }
+                    }
                     throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Máquina em nível de risco ALTO. É necessária autorização prévia do proprietário.");
                 }
                 maquina.setAutorizadaOperacaoRisco(false);
@@ -113,14 +137,19 @@ public class OperacaoService {
             registroOperacaoRepository.save(registro);
 
         } else if ("Em Operacao".equals(statusAtual)) {
-            if (dto.getObservacoes() == null || dto.getObservacoes().trim().isEmpty()) {
-                throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Observações são obrigatórias ao encerrar uma operação.");
+            List<RegistroOperacao> ativas = registroOperacaoRepository.buscarOperacoesAtivas(idMaquina);
+            if (!ativas.isEmpty()) {
+                RegistroOperacao opAtiva = ativas.get(0);
+                if (!opAtiva.getOperador().getId_usuario().equals(idUsuarioLogado)) {
+                    throw new ResponseStatusException(HttpStatusCode.valueOf(403),
+                        "Somente o operador que iniciou a operação pode encerrá-la.");
+                }
             }
+
             if (dto.getHodometroFim() == null) {
                 throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Hodômetro final é obrigatório ao encerrar uma operação.");
             }
 
-            List<RegistroOperacao> ativas = registroOperacaoRepository.buscarOperacoesAtivas(idMaquina);
             if (!ativas.isEmpty()) {
                 RegistroOperacao registro = ativas.get(0);
                 if (dto.getHodometroFim().compareTo(registro.getHodometroInicio()) < 0) {
@@ -129,6 +158,10 @@ public class OperacaoService {
                 registro.setDataFim(LocalDateTime.now());
                 registro.setHodometroFim(dto.getHodometroFim());
                 registro.setObservacoes(dto.getObservacoes());
+
+                if ("Colheitadeira".equals(maquina.getTipo()) && dto.getPesoFinal() != null) {
+                    registro.setPesoFinal(dto.getPesoFinal());
+                }
 
                 registroOperacaoRepository.save(registro);
 
@@ -165,6 +198,22 @@ public class OperacaoService {
         }
 
         maquina.setStatus(novoStatus);
+
+        if ("Inativa".equals(novoStatus) || "Em Manutencao".equals(novoStatus)) {
+            if (dto.getMotivo() == null || dto.getMotivo().trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatusCode.valueOf(400),
+                    "O motivo é obrigatório ao mudar para " + novoStatus + ".");
+            }
+            HistoricoStatusMaquina hist = new HistoricoStatusMaquina();
+            hist.setMaquina(maquina);
+            hist.setUsuario(usuario);
+            hist.setStatusAnterior(statusAtual);
+            hist.setNovoStatus(novoStatus);
+            hist.setMotivo(dto.getMotivo());
+            hist.setDataAlteracao(LocalDateTime.now());
+            historicoStatusMaquinaRepository.save(hist);
+        }
+
         maquinaRepository.save(maquina);
 
         return resumo;
@@ -189,6 +238,7 @@ public class OperacaoService {
                 }
             }
             map.put("pesoCarregado", r.getPesoCarregado());
+            map.put("pesoFinal", r.getPesoFinal());
             historico.add(map);
         });
 
@@ -214,17 +264,64 @@ public class OperacaoService {
             historico.add(map);
         });
 
+        historicoStatusMaquinaRepository.buscarPorMaquinaId(idMaquina).forEach(h -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("tipo", "MudancaStatus");
+            map.put("id", h.getId());
+            map.put("dataAlteracao", h.getDataAlteracao().toString());
+            map.put("statusAnterior", h.getStatusAnterior());
+            map.put("novoStatus", h.getNovoStatus());
+            map.put("motivo", h.getMotivo());
+            map.put("nomeUsuario", h.getUsuario().getNome());
+            historico.add(map);
+        });
+
         historico.sort((m1, m2) -> {
             String d1 = m1.containsKey("dataInicio") ? (String) m1.get("dataInicio") :
                         m1.containsKey("dataAbastecimento") ? (String) m1.get("dataAbastecimento") :
+                        m1.containsKey("dataAlteracao") ? (String) m1.get("dataAlteracao") :
                         (String) m1.get("dataAutorizacao");
             String d2 = m2.containsKey("dataInicio") ? (String) m2.get("dataInicio") :
                         m2.containsKey("dataAbastecimento") ? (String) m2.get("dataAbastecimento") :
+                        m2.containsKey("dataAlteracao") ? (String) m2.get("dataAlteracao") :
                         (String) m2.get("dataAutorizacao");
+            if (d1 == null) return 1;
+            if (d2 == null) return -1;
             return d2.compareTo(d1);
         });
 
         return historico;
+    }
+
+    public RegistroOperacaoDTO obterOperacaoAtiva(Long idMaquina) {
+        List<RegistroOperacao> ativas = registroOperacaoRepository.buscarOperacoesAtivas(idMaquina);
+        if (ativas.isEmpty()) {
+            return null;
+        }
+        RegistroOperacao registro = ativas.get(0);
+        RegistroOperacaoDTO dto = new RegistroOperacaoDTO();
+        dto.setId(registro.getId());
+        dto.setIdMaquina(registro.getMaquina().getId());
+        dto.setNomeMaquina(registro.getMaquina().getNome());
+        dto.setIdOperador(registro.getOperador().getId_usuario());
+        dto.setNomeOperador(registro.getOperador().getNome());
+        dto.setDataInicio(registro.getDataInicio());
+        dto.setHodometroInicio(registro.getHodometroInicio());
+        dto.setPesoCarregado(registro.getPesoCarregado());
+
+        long minutes = Duration.between(registro.getDataInicio(), LocalDateTime.now()).toMinutes();
+        dto.setHorasOperadas(BigDecimal.valueOf(minutes).divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP));
+
+        List<Abastecimento> absPeriodo = abastecimentoRepository.buscarPorMaquinaEIntervalo(
+                idMaquina, registro.getDataInicio(), LocalDateTime.now());
+        if (absPeriodo != null && !absPeriodo.isEmpty()) {
+            BigDecimal totalLitros = absPeriodo.stream()
+                    .map(Abastecimento::getLitros)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            dto.setConsumoEstimadoOperacao(totalLitros);
+        }
+
+        return dto;
     }
 
     private RegistroOperacaoDTO toDTO(RegistroOperacao r) {
@@ -239,6 +336,7 @@ public class OperacaoService {
         dto.setHodometroInicio(r.getHodometroInicio());
         dto.setHodometroFim(r.getHodometroFim());
         dto.setPesoCarregado(r.getPesoCarregado());
+        dto.setPesoFinal(r.getPesoFinal());
         dto.setObservacoes(r.getObservacoes());
 
         if (r.getDataFim() != null) {

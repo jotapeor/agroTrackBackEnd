@@ -172,12 +172,24 @@ public class ProprietarioService {
     }
 
     public void excluirColaborador(Long id) {
-        if (!userRepository.existsById(id))
-            throw new ResponseStatusException(HttpStatusCode.valueOf(404), "Colaborador não encontrado.");
+        Usuario usuario = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Colaborador não encontrado."));
         try {
-            userRepository.deleteById(id);
+            usuario.setAtivo(false);
+            userRepository.save(usuario);
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Erro interno ao excluir o colaborador.");
+            throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Erro interno ao desativar o colaborador.");
+        }
+    }
+
+    public void reativarColaborador(Long id) {
+        Usuario usuario = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Colaborador não encontrado."));
+        try {
+            usuario.setAtivo(true);
+            userRepository.save(usuario);
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(500), "Erro interno ao reativar o colaborador.");
         }
     }
 
