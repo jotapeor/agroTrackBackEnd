@@ -51,51 +51,8 @@ INSERT INTO `abastecimento` VALUES (1,1,2,'2026-06-20 06:45:00',150.00,'Diesel S
 UNLOCK TABLES;
 
 --
--- Table structure for table `fazenda`
+-- Table structure for table `autorizacao_risco`
 --
-
-DROP TABLE IF EXISTS `fazenda`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `fazenda` (
-  `id_fazenda` int NOT NULL AUTO_INCREMENT,
-  `nome` varchar(150) NOT NULL,
-  `localizacao` varchar(255) DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  `data_cadastro` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id_fazenda`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `fazenda`
---
-
-LOCK TABLES `fazenda` WRITE;
-/*!40000 ALTER TABLE `fazenda` DISABLE KEYS */;
-INSERT INTO `fazenda` VALUES (1,'Fazenda Boa Esperança','Rodovia BR-364, Km 120, Zona Rural',1,'2026-07-01 08:00:00'),(2,'Fazenda Santa Fé','Estrada Municipal 456, Lote 12',1,'2026-07-01 08:00:00'),(3,'Fazenda Nossa Senhora Aparecida','Rodovia SP-225, Km 45, Zona Rural',1,'2026-07-01 08:05:00');
-/*!40000 ALTER TABLE `fazenda` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `talhao`
---
-
-DROP TABLE IF EXISTS `talhao`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `talhao` (
-  `id_talhao` int NOT NULL AUTO_INCREMENT,
-  `id_fazenda` int NOT NULL,
-  `nome` varchar(100) NOT NULL,
-  `area_hectares` decimal(10,2) DEFAULT NULL,
-  `cultura_atual` varchar(100) DEFAULT NULL,
-  `ativo` tinyint(1) DEFAULT '1',
-  PRIMARY KEY (`id_talhao`),
-  KEY `id_fazenda` (`id_fazenda`),
-  CONSTRAINT `talhao_ibfk_1` FOREIGN KEY (`id_fazenda`) REFERENCES `fazenda` (`id_fazenda`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 DROP TABLE IF EXISTS `autorizacao_risco`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -115,13 +72,71 @@ CREATE TABLE `autorizacao_risco` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `talhao`
+-- Dumping data for table `autorizacao_risco`
 --
 
-LOCK TABLES `talhao` WRITE;
-/*!40000 ALTER TABLE `talhao` DISABLE KEYS */;
-INSERT INTO `talhao` VALUES (1,1,'Talhão 1 - Soja',45.00,'Soja',1),(2,1,'Talhão 2 - Milho',32.50,'Milho',1),(3,1,'Talhão 3 - Pastagem',28.00,'Pastagem',1),(4,2,'Talhão Norte',50.00,'Soja',1),(5,2,'Talhão Sul',38.00,'Milho',1),(6,3,'Talhão Leste',22.00,'Café',1),(7,3,'Talhão Oeste',30.00,'Cana-de-Açúcar',1);
-/*!40000 ALTER TABLE `talhao` ENABLE KEYS */;
+LOCK TABLES `autorizacao_risco` WRITE;
+/*!40000 ALTER TABLE `autorizacao_risco` DISABLE KEYS */;
+/*!40000 ALTER TABLE `autorizacao_risco` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `fazenda`
+--
+
+DROP TABLE IF EXISTS `fazenda`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `fazenda` (
+  `id_fazenda` int NOT NULL AUTO_INCREMENT,
+  `nome` varchar(150) NOT NULL,
+  `localizacao` varchar(255) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  `data_cadastro` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id_fazenda`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `fazenda`
+--
+
+LOCK TABLES `fazenda` WRITE;
+/*!40000 ALTER TABLE `fazenda` DISABLE KEYS */;
+INSERT INTO `fazenda` VALUES (1,'Fazenda Boa Esperança','Rodovia BR-364, Km 120, Zona Rural',1,'2026-07-01 08:00:00'),(2,'Fazenda Santa Fé','Estrada Municipal 456, Lote 12',1,'2026-07-01 08:00:00'),(3,'Fazenda Nossa Senhora Aparecida','Rodovia SP-225, Km 45, Zona Rural',1,'2026-07-01 08:05:00');
+/*!40000 ALTER TABLE `fazenda` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `historico_status_maquina`
+--
+
+DROP TABLE IF EXISTS `historico_status_maquina`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `historico_status_maquina` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `id_maquina` int NOT NULL,
+  `id_usuario` int NOT NULL,
+  `status_anterior` varchar(50) NOT NULL,
+  `novo_status` varchar(50) NOT NULL,
+  `motivo` text NOT NULL,
+  `data_alteracao` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_hsm_maquina` (`id_maquina`),
+  KEY `fk_hsm_usuario` (`id_usuario`),
+  CONSTRAINT `fk_hsm_maquina` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE RESTRICT,
+  CONSTRAINT `fk_hsm_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `historico_status_maquina`
+--
+
+LOCK TABLES `historico_status_maquina` WRITE;
+/*!40000 ALTER TABLE `historico_status_maquina` DISABLE KEYS */;
+/*!40000 ALTER TABLE `historico_status_maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -180,6 +195,8 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `maquina_combustivel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `maquina_combustivel` (
   `id` int NOT NULL AUTO_INCREMENT,
   `id_maquina` int NOT NULL,
@@ -187,16 +204,17 @@ CREATE TABLE `maquina_combustivel` (
   PRIMARY KEY (`id`),
   KEY `id_maquina` (`id_maquina`),
   CONSTRAINT `maquina_combustivel_ibfk_1` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `maquina_combustivel`
+--
 
 LOCK TABLES `maquina_combustivel` WRITE;
-INSERT INTO `maquina_combustivel` (`id_maquina`, `tipo_combustivel`) VALUES
-(1,'Diesel S10'),
-(2,'Diesel S500'),
-(3,'Diesel S10'),
-(4,'Diesel S10'),
-(5,'Diesel S500'),
-(6,'Diesel S10');
+/*!40000 ALTER TABLE `maquina_combustivel` DISABLE KEYS */;
+INSERT INTO `maquina_combustivel` VALUES (1,1,'Diesel S10'),(2,2,'Diesel S500'),(3,3,'Diesel S10'),(4,4,'Diesel S10'),(5,5,'Diesel S500'),(6,6,'Diesel S10');
+/*!40000 ALTER TABLE `maquina_combustivel` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -222,7 +240,7 @@ CREATE TABLE `notificacao` (
   CONSTRAINT `notificacao_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
   CONSTRAINT `notificacao_ibfk_2` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE SET NULL,
   CONSTRAINT `notificacao_ibfk_3` FOREIGN KEY (`id_ordem_manutencao`) REFERENCES `ordem_manutencao` (`id_ordem`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -231,13 +249,7 @@ CREATE TABLE `notificacao` (
 
 LOCK TABLES `notificacao` WRITE;
 /*!40000 ALTER TABLE `notificacao` DISABLE KEYS */;
-INSERT INTO `notificacao` (`id_notificacao`,`id_usuario`,`id_maquina`,`id_ordem_manutencao`,`tipo`,`mensagem`,`lida`,`data_criacao`) VALUES
-(1,1,1,NULL,'alerta_preventivo','O Trator John Deere está se aproximando do limite de quilometragem para a próxima revisão (faltam 50km).',0,'2026-06-23 13:45:33'),
-(2,1,2,2,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira Case IH.',0,'2026-06-23 13:45:33'),
-(3,2,3,3,'anomalia','Falha crítica registrada no Pulverizador Jacto. Máquina marcada como Inativa/Em Manutenção.',1,'2026-06-23 13:45:33'),
-(4,6,5,5,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira New Holland.',0,'2026-06-24 11:05:00'),
-(5,4,4,NULL,'alerta_preventivo','O Trator Massey Ferguson está se aproximando do limite de quilometragem para a próxima revisão (faltam 30km).',0,'2026-06-24 11:10:00'),
-(6,5,6,6,'anomalia','Pulverizador Stara apresenta risco elevado devido à verificação pendente do sistema hidráulico.',0,'2026-06-24 11:15:00');
+INSERT INTO `notificacao` VALUES (1,1,1,NULL,'alerta_preventivo','O Trator John Deere está se aproximando do limite de quilometragem para a próxima revisão (faltam 50km).',0,'2026-06-23 13:45:33'),(2,1,2,2,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira Case IH.',0,'2026-06-23 13:45:33'),(3,2,3,3,'anomalia','Falha crítica registrada no Pulverizador Jacto. Máquina marcada como Inativa/Em Manutenção.',1,'2026-06-23 13:45:33'),(4,6,5,5,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira New Holland.',0,'2026-06-24 11:05:00'),(5,4,4,NULL,'alerta_preventivo','O Trator Massey Ferguson está se aproximando do limite de quilometragem para a próxima revisão (faltam 30km).',0,'2026-06-24 11:10:00'),(6,5,6,6,'anomalia','Pulverizador Stara apresenta risco elevado devido à verificação pendente do sistema hidráulico.',0,'2026-06-24 11:15:00'),(7,1,1,NULL,'alerta_preventivo','Trator John Deere próximo da troca de óleo. Hodômetro: 1250.50',0,'2026-06-20 08:00:00'),(8,1,2,NULL,'anomalia','Anomalia de consumo detectada na Colheitadeira Case IH. Consumo atual: 42.00, Média: 35.00',0,'2026-06-20 10:30:00'),(9,1,1,NULL,'alerta_preventivo','Trator John Deere próximo da inspeção. Hodômetro: 1250.50',0,'2026-06-21 07:00:00'),(10,1,4,NULL,'alerta_preventivo','Trator MF 4275 próximo da troca de óleo. Hodômetro: 890.30',0,'2026-06-22 09:00:00'),(11,1,3,NULL,'anomalia','Anomalia de consumo detectada no Pulverizador Jacto. Consumo atual: 25.00, Média: 18.20',0,'2026-06-22 14:00:00'),(12,1,5,NULL,'anomalia','Anomalia de consumo detectada na Colheitadeira NH. Consumo atual: 50.00, Média: 40.50',0,'2026-06-23 11:00:00'),(13,1,6,NULL,'alerta_preventivo','Pulverizador Stara próximo da inspeção. Hodômetro: 2100.60',0,'2026-06-24 08:00:00'),(14,1,2,NULL,'alerta_preventivo','Colheitadeira Case IH próxima da troca de óleo. Hodômetro: 450.00',0,'2026-06-24 15:00:00'),(15,1,1,NULL,'anomalia','Anomalia de consumo detectada no Trator John Deere. Consumo atual: 18.00, Média: 12.50',0,'2026-07-01 09:00:00'),(16,1,3,NULL,'alerta_preventivo','Pulverizador Jacto próximo da troca de óleo. Hodômetro: 3200.80',0,'2026-07-05 10:00:00'),(17,1,4,NULL,'anomalia','Anomalia de consumo detectada no Trator MF 4275. Consumo atual: 20.00, Média: 13.80',0,'2026-07-10 11:00:00'),(18,1,5,NULL,'alerta_preventivo','Colheitadeira NH próxima da inspeção. Hodômetro: 120.00',0,'2026-07-15 08:30:00');
 /*!40000 ALTER TABLE `notificacao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -294,7 +306,7 @@ CREATE TABLE `registro_operacao` (
   `hodometro_fim` decimal(10,2) DEFAULT NULL,
   `peso_carregado` decimal(8,2) DEFAULT NULL,
   `observacoes` text,
-  `peso_final` decimal(10,2) DEFAULT NULL,
+  `peso_final` decimal(10,2) DEFAULT NULL COMMENT 'Peso colhido ao encerrar (apenas Colheitadeira)',
   PRIMARY KEY (`id_operacao`),
   KEY `id_maquina` (`id_maquina`),
   KEY `id_usuario` (`id_usuario`),
@@ -311,6 +323,67 @@ LOCK TABLES `registro_operacao` WRITE;
 /*!40000 ALTER TABLE `registro_operacao` DISABLE KEYS */;
 INSERT INTO `registro_operacao` VALUES (1,1,2,'2026-06-20 07:00:00','2026-06-20 17:00:00',1240.50,1250.50,NULL,'Gradeação do talhão 4.',NULL),(2,2,3,'2026-06-21 06:00:00','2026-06-21 18:00:00',420.00,450.00,15000.00,'Colheita de soja no talhão 2.',12500.00),(3,3,2,'2026-06-22 08:00:00',NULL,3200.80,NULL,NULL,'Operação interrompida por falha na bomba de pulverização.',NULL),(4,4,5,'2026-06-24 07:00:00','2026-06-24 16:00:00',870.00,890.30,NULL,'Preparo de solo no talhão 6.',NULL),(5,5,4,'2026-06-24 06:30:00',NULL,100.00,NULL,NULL,'Colheita de milho no talhão 3, em andamento.',NULL),(6,6,6,'2026-06-24 08:00:00','2026-06-24 12:00:00',2080.00,2100.60,NULL,'Aplicação de defensivo no talhão 5.',NULL);
 /*!40000 ALTER TABLE `registro_operacao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `talhao`
+--
+
+DROP TABLE IF EXISTS `talhao`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `talhao` (
+  `id_talhao` int NOT NULL AUTO_INCREMENT,
+  `id_fazenda` int NOT NULL,
+  `nome` varchar(100) NOT NULL,
+  `area_hectares` decimal(10,2) DEFAULT NULL,
+  `cultura_atual` varchar(100) DEFAULT NULL,
+  `ativo` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id_talhao`),
+  KEY `id_fazenda` (`id_fazenda`),
+  CONSTRAINT `talhao_ibfk_1` FOREIGN KEY (`id_fazenda`) REFERENCES `fazenda` (`id_fazenda`) ON DELETE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `talhao`
+--
+
+LOCK TABLES `talhao` WRITE;
+/*!40000 ALTER TABLE `talhao` DISABLE KEYS */;
+INSERT INTO `talhao` VALUES (1,1,'Talhão 1 - Soja',45.00,'Soja',1),(2,1,'Talhão 2 - Milho',32.50,'Milho',1),(3,1,'Talhão 3 - Pastagem',28.00,'Pastagem',1),(4,2,'Talhão Norte',50.00,'Soja',1),(5,2,'Talhão Sul',38.00,'Milho',1),(6,3,'Talhão Leste',22.00,'Café',1),(7,3,'Talhão Oeste',30.00,'Cana-de-Açúcar',1);
+/*!40000 ALTER TABLE `talhao` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `telemetria_maquina`
+--
+
+DROP TABLE IF EXISTS `telemetria_maquina`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `telemetria_maquina` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `id_maquina` int NOT NULL,
+  `velocidade_atual` decimal(10,2) DEFAULT NULL,
+  `consumo_atual` decimal(10,2) DEFAULT NULL,
+  `latitude` decimal(11,8) DEFAULT NULL,
+  `longitude` decimal(11,8) DEFAULT NULL,
+  `data_atualizacao` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_telemetria_maquina` (`id_maquina`),
+  CONSTRAINT `fk_telemetria_maquina` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `telemetria_maquina`
+--
+
+LOCK TABLES `telemetria_maquina` WRITE;
+/*!40000 ALTER TABLE `telemetria_maquina` DISABLE KEYS */;
+INSERT INTO `telemetria_maquina` VALUES (1,5,7.21,45.92,-12.95197156,-55.93226858,'2026-07-30 22:14:02');
+/*!40000 ALTER TABLE `telemetria_maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -332,7 +405,7 @@ CREATE TABLE `usuario` (
   `data_criacao` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -341,14 +414,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` (`id_usuario`, `nome`, `email`, `senha`, `perfil`, `ativo`, `primeiro_acesso`, `foto_path`, `data_criacao`) VALUES
-(1,'João Batista','joao.batista@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,0,NULL,'2026-06-23 13:45:21'),
-(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-23 13:45:21'),
-(3,'Marcos Silva','marcos.silva@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-23 13:45:21'),
-(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-24 08:10:00'),
-(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-24 08:15:00'),
-(6,'Patrícia Souza','patricia.souza@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00'),
-(7,'Roberto Lima','roberto.lima@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','SOCIO',1,1,NULL,'2026-07-16 10:00:00');
+INSERT INTO `usuario` VALUES (1,'João Batista','joao.batista@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,0,NULL,'2026-06-23 13:45:21'),(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-23 13:45:21'),(3,'Marcos Silva','marcos.silva@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-23 13:45:21'),(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-24 08:10:00'),(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-24 08:15:00'),(6,'Patrícia Souza','patricia.souza@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00'),(7,'Roberto Lima','roberto.lima@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','SOCIO',1,1,NULL,'2026-07-16 10:00:00');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -388,45 +454,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-08 20:08:01
-
--- Notificações adicionais para relatórios (tipos usados pelo sistema)
-INSERT INTO `notificacao` (`id_usuario`, `id_maquina`, `tipo`, `mensagem`, `data_criacao`, `lida`) VALUES
-(1, 1, 'alerta_preventivo', 'Trator John Deere próximo da troca de óleo. Hodômetro: 1250.50', '2026-06-20 08:00:00', 0),
-(1, 2, 'anomalia', 'Anomalia de consumo detectada na Colheitadeira Case IH. Consumo atual: 42.00, Média: 35.00', '2026-06-20 10:30:00', 0),
-(1, 1, 'alerta_preventivo', 'Trator John Deere próximo da inspeção. Hodômetro: 1250.50', '2026-06-21 07:00:00', 0),
-(1, 4, 'alerta_preventivo', 'Trator MF 4275 próximo da troca de óleo. Hodômetro: 890.30', '2026-06-22 09:00:00', 0),
-(1, 3, 'anomalia', 'Anomalia de consumo detectada no Pulverizador Jacto. Consumo atual: 25.00, Média: 18.20', '2026-06-22 14:00:00', 0),
-(1, 5, 'anomalia', 'Anomalia de consumo detectada na Colheitadeira NH. Consumo atual: 50.00, Média: 40.50', '2026-06-23 11:00:00', 0),
-(1, 6, 'alerta_preventivo', 'Pulverizador Stara próximo da inspeção. Hodômetro: 2100.60', '2026-06-24 08:00:00', 0),
-(1, 2, 'alerta_preventivo', 'Colheitadeira Case IH próxima da troca de óleo. Hodômetro: 450.00', '2026-06-24 15:00:00', 0),
-(1, 1, 'anomalia', 'Anomalia de consumo detectada no Trator John Deere. Consumo atual: 18.00, Média: 12.50', '2026-07-01 09:00:00', 0),
-(1, 3, 'alerta_preventivo', 'Pulverizador Jacto próximo da troca de óleo. Hodômetro: 3200.80', '2026-07-05 10:00:00', 0),
-(1, 4, 'anomalia', 'Anomalia de consumo detectada no Trator MF 4275. Consumo atual: 20.00, Média: 13.80', '2026-07-10 11:00:00', 0),
-(1, 5, 'alerta_preventivo', 'Colheitadeira NH próxima da inspeção. Hodômetro: 120.00', '2026-07-15 08:30:00', 0);
-
-CREATE TABLE IF NOT EXISTS `historico_status_maquina` (
-    `id` BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `id_maquina` INT NOT NULL,
-    `id_usuario` INT NOT NULL,
-    `status_anterior` VARCHAR(50) NOT NULL,
-    `novo_status` VARCHAR(50) NOT NULL,
-    `motivo` TEXT NOT NULL,
-    `data_alteracao` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT `fk_hsm_maquina` FOREIGN KEY (`id_maquina`) REFERENCES `maquina`(`id_maquina`),
-    CONSTRAINT `fk_hsm_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario`(`id_usuario`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-CREATE TABLE IF NOT EXISTS `telemetria_maquina` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `id_maquina` int NOT NULL,
-  `velocidade_atual` decimal(10,2) DEFAULT NULL,
-  `consumo_atual` decimal(10,2) DEFAULT NULL,
-  `latitude` decimal(11,8) DEFAULT NULL,
-  `longitude` decimal(11,8) DEFAULT NULL,
-  `data_atualizacao` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_telemetria_maquina` (`id_maquina`),
-  CONSTRAINT `fk_telemetria_maquina` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
+-- Dump completed on 2026-07-30 22:14:03

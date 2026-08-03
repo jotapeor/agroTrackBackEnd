@@ -57,9 +57,13 @@ public class ProprietarioController {
     @PutMapping("/colaboradores/{id}")
     public ResponseEntity<Map<String, String>> atualizarColaborador(
             @PathVariable Long id,
-            @RequestBody Map<String, String> dados) {
+            @RequestParam("nome") String nome,
+            @RequestParam("email") String email,
+            @RequestParam("perfil") String perfil,
+            @RequestParam(value = "ativo", defaultValue = "true") boolean ativo,
+            @RequestParam(value = "foto", required = false) MultipartFile foto) {
         UsuarioDTO solicitante = (UsuarioDTO) org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        proprietarioService.atualizarColaborador(id, dados, solicitante);
+        proprietarioService.atualizarColaborador(id, nome, email, perfil, ativo, foto, solicitante);
         return ResponseEntity.ok(Map.of("message", "Colaborador atualizado com sucesso!"));
     }
 
