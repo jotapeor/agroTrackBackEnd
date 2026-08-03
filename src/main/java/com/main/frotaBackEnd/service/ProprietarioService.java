@@ -72,7 +72,8 @@ public class ProprietarioService {
         }
     }
 
-    public void atualizarColaborador(Long id, Map<String, String> dados, UsuarioDTO solicitante) {
+    public void atualizarColaborador(Long id, String nome, String email, String perfil,
+                                     boolean ativo, MultipartFile foto, UsuarioDTO solicitante) {
         Usuario usuario = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Colaborador não encontrado."));
 
@@ -80,11 +81,6 @@ public class ProprietarioService {
             if (!PerfilUsuario.OPERADOR.equals(usuario.getPerfil()))
                 throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Você não tem permissão para editar este colaborador.");
         }
-
-        String nome = dados.get("nome");
-        String email = dados.get("email");
-        String perfil = dados.get("perfil");
-        String ativoStr = dados.get("ativo");
 
         if (nome != null && !nome.trim().isEmpty()) {
             if (nome.trim().length() < 3)
@@ -111,8 +107,10 @@ public class ProprietarioService {
             usuario.setPerfil(perfil);
         }
 
-        if (ativoStr != null) {
-            usuario.setAtivo("true".equals(ativoStr));
+        usuario.setAtivo(ativo);
+
+        if (foto != null && !foto.isEmpty()) {
+            usuario.setFoto_path(salvarFoto(foto));
         }
 
         try {

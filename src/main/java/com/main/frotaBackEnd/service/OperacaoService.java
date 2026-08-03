@@ -61,21 +61,19 @@ public class OperacaoService {
         Usuario usuario = userRepository.findById(idUsuarioLogado)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatusCode.valueOf(404), "Usuário não encontrado."));
 
-        if (!"PROPRIETARIO".equals(perfilUsuario) && !"SOCIO".equals(perfilUsuario)) {
+        if (!"PROPRIETARIO".equals(perfilUsuario)) {
             boolean vinculado = userRepository.verificaVinculo(idUsuarioLogado, idMaquina);
             if (!vinculado) {
                 throw new ResponseStatusException(HttpStatusCode.valueOf(403), "Você não tem permissão para operar esta máquina.");
             }
         }
 
-        if (!"PROPRIETARIO".equals(perfilUsuario) && !"SOCIO".equals(perfilUsuario)) {
-            List<RegistroOperacao> operacoesAtivas = registroOperacaoRepository.buscarOperacoesAtivas(idMaquina);
-            if (!operacoesAtivas.isEmpty()) {
-                RegistroOperacao opAberta = operacoesAtivas.get(0);
-                if (!opAberta.getOperador().getId_usuario().equals(idUsuarioLogado)) {
-                    throw new ResponseStatusException(HttpStatusCode.valueOf(403),
-                        "Esta máquina já está em operação por outro colaborador.");
-                }
+        List<RegistroOperacao> operacoesAtivas = registroOperacaoRepository.buscarOperacoesAtivas(idMaquina);
+        if (!operacoesAtivas.isEmpty()) {
+            RegistroOperacao opAberta = operacoesAtivas.get(0);
+            if (!opAberta.getOperador().getId_usuario().equals(idUsuarioLogado)) {
+                throw new ResponseStatusException(HttpStatusCode.valueOf(403),
+                    "Somente o operador que iniciou esta operação pode encerrá-la.");
             }
         }
 
@@ -84,6 +82,12 @@ public class OperacaoService {
 
         if (novoStatus.equals(statusAtual)) {
             throw new ResponseStatusException(HttpStatusCode.valueOf(400), "A máquina já está neste status.");
+        }
+
+        if ("OPERADOR".equals(perfilUsuario) &&
+                ("Inativa".equals(novoStatus) || "Em Manutencao".equals(novoStatus))) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(403),
+                "Operadores não têm permissão para inativar ou enviar máquinas para manutenção.");
         }
 
         if ("Em Manutencao".equals(statusAtual) && "Em Operacao".equals(novoStatus)) {
@@ -212,6 +216,23 @@ public class OperacaoService {
             hist.setMotivo(dto.getMotivo());
             hist.setDataAlteracao(LocalDateTime.now());
             historicoStatusMaquinaRepository.save(hist);
+
+            if ("SOCIO".equals(perfilUsuario)) {
+                List<Usuario> proprietarios = userRepository.findAll().stream()
+                        .filter(u -> "PROPRIETARIO".equals(u.getPerfil())).toList();
+                for (Usuario prop : proprietarios) {
+                    Notificacao notif = new Notificacao();
+                    notif.setUsuarioDestinatario(prop);
+                    notif.setTipo("mudanca_status_socio");
+                    notif.setMensagem("O sócio " + usuario.getNome() + " alterou o status da máquina '"
+                            + maquina.getNome() + "' de '" + statusAtual + "' para '" + novoStatus
+                            + "'. Motivo: " + dto.getMotivo());
+                    notif.setMaquina(maquina);
+                    notif.setLida(false);
+                    notif.setDataCriacao(LocalDateTime.now());
+                    notificacaoRepository.save(notif);
+                }
+            }
         }
 
         maquinaRepository.save(maquina);

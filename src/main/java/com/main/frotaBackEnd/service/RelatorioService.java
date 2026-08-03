@@ -21,11 +21,19 @@ public class RelatorioService {
 
     public List<ConsumoMaquinaDTO> relatorioConsumo(LocalDateTime inicio, LocalDateTime fim) {
         List<Object[]> results = em.createQuery(
-            "SELECT m.id, m.nome, m.consumoMedio FROM Maquina m WHERE m.ativo = true AND m.consumoMedio IS NOT NULL ORDER BY m.consumoMedio DESC", Object[].class)
+            "SELECT m.id, m.nome, SUM(a.litros) " +
+            "FROM Abastecimento a JOIN a.maquina m " +
+            "WHERE a.dataAbastecimento >= :inicio AND a.dataAbastecimento <= :fim " +
+            "AND m.ativo = true " +
+            "GROUP BY m.id, m.nome " +
+            "ORDER BY SUM(a.litros) DESC", Object[].class)
+            .setParameter("inicio", inicio)
+            .setParameter("fim", fim)
             .getResultList();
 
         return results.stream()
-                .map(r -> new ConsumoMaquinaDTO((Long)r[0], (String)r[1], (BigDecimal)r[2]))
+                .map(r -> new ConsumoMaquinaDTO((Long)r[0], (String)r[1],
+                    r[2] != null ? new BigDecimal(r[2].toString()) : BigDecimal.ZERO))
                 .collect(Collectors.toList());
     }
 
