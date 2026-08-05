@@ -186,7 +186,7 @@ CREATE TABLE `maquina` (
 
 LOCK TABLES `maquina` WRITE;
 /*!40000 ALTER TABLE `maquina` DISABLE KEYS */;
-INSERT INTO `maquina` VALUES (1,1,1,'Trator 01 - John Deere','Trator','John Deere','6100J',2021,'9YZ1234XG1234567','ABC-1234',1250.50,250.00,'Diesel S10',250,500,12.50,'Disponivel','Baixo','2020-01-15',320000.00,NULL,'Trator principal para preparo de solo.','2026-06-23 13:45:24',0,1),(2,1,2,'Colheitadeira Case IH','Colheitadeira','Case IH','250 Series',2023,'H8T5678AB9012345','DEF-5678',450.00,400.00,'Diesel S500',200,300,35.00,'Disponivel','Medio','2023-03-10',890000.00,NULL,'Colheitadeira de alta capacidade para grãos.','2026-06-23 13:45:24',0,1),(3,2,4,'Pulverizador Jacto 3030','Pulverizador','Jacto','Uniport 3030',2020,'P3X9012CD3456789',NULL,3200.80,300.00,'Diesel S10',250,400,18.20,'Em Manutencao','Alto','2020-06-20',450000.00,NULL,'Apresentou falha na bomba hidráulica.','2026-06-23 13:45:24',0,1),(4,2,5,'Trator MF 4275','Trator','Massey Ferguson','4275',2022,'M4F3456EF7890123','GHI-9012',890.30,250.00,'Diesel S10',250,500,13.80,'Disponivel','Baixo','2022-02-10',280000.00,NULL,'Utilizado em operações de plantio direto.','2026-06-24 09:00:00',0,1),(5,3,6,'Colheitadeira NH CR6.90','Colheitadeira','New Holland','CR6.90',2024,'N5H7890GH1234567','JKL-3456',120.00,450.00,'Diesel S500',200,300,40.50,'Em Operacao','Medio','2024-01-05',950000.00,NULL,'Colheitadeira nova para a safra de café.','2026-06-24 09:05:00',0,1),(6,3,7,'Pulverizador Stara','Pulverizador','Stara','Imperador 3.0',2021,'S6T1234IJ5678901',NULL,2100.60,350.00,'Diesel S10',250,400,17.90,'Disponivel','Baixo','2021-05-15',520000.00,NULL,'Pulverizador para aplicação de defensivos.','2026-06-24 09:10:00',0,1);
+INSERT INTO `maquina` VALUES (1,1,1,'Trator 01 - John Deere','Trator','John Deere','6100J',2021,'9YZ1234XG1234567','ABC-1234',1250.50,250.00,'Diesel S10',250,500,12.50,'Disponivel','Baixo','2020-01-15',320000.00,'cb34ee88-a16f-4947-b2c9-988a536b516b_John Deere 6100J.jpeg','Trator principal para preparo de solo.','2026-06-23 00:00:00',0,1),(2,1,2,'Colheitadeira Case IH','Colheitadeira','Case IH','250 Series',2023,'H8T5678AB9012345','DEF-5678',450.00,400.00,'Diesel S500',200,300,35.00,'Disponivel','Medio','2023-03-10',890000.00,'779d2ce9-1715-4917-9b59-a953f264166f_Case IH 250 Series.jpg','Colheitadeira de alta capacidade para grãos.','2026-06-23 00:00:00',0,1),(3,2,4,'Pulverizador Jacto 3030','Pulverizador','Jacto','Uniport 3030',2020,'P3X9012CD3456789',NULL,3200.80,300.00,'Diesel S10',250,400,18.20,'Disponivel','Baixo','2020-06-20',450000.00,'cc0e7a35-3c66-42aa-aadd-04d43e68cbc6_Jacto Uniport 3030.jpg','Apresentou falha na bomba hidráulica.','2026-06-23 00:00:00',0,1),(4,2,5,'Trator MF 4275','Trator','Massey Ferguson','4275',2022,'M4F3456EF7890123','GHI-9012',895.00,250.00,'Diesel S10',250,500,13.80,'Disponivel','Baixo','2022-02-10',280000.00,'006705f9-a314-4d81-91f1-d714540a3061_Massey Ferguson 4275.jpg','Utilizado em operações de plantio direto.','2026-06-24 00:00:00',0,1),(5,3,6,'Colheitadeira NH CR6.90','Colheitadeira','New Holland','CR6.90',2024,'N5H7890GH1234567','JKL-3456',130.00,450.00,'Diesel S500',200,300,40.50,'Disponivel','Baixo','2024-01-05',950000.00,'7dfed867-6c2a-45b3-bb25-a044a84752a5_New Holland CR6.90.jpg','Colheitadeira nova para a safra de café.','2026-06-24 00:00:00',0,1),(6,3,7,'Pulverizador Stara','Pulverizador','Stara','Imperador 3.0',2021,'S6T1234IJ5678901',NULL,2100.60,350.00,'Diesel S10',250,400,17.90,'Disponivel','Baixo','2021-05-15',520000.00,'25ba326b-d088-47de-a64f-17fbe1e1d317_Stara Imperador 3.0.jpg','Pulverizador para aplicação de defensivos.','2026-06-24 00:00:00',0,1);
 /*!40000 ALTER TABLE `maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -213,7 +213,6 @@ CREATE TABLE `maquina_combustivel` (
 
 LOCK TABLES `maquina_combustivel` WRITE;
 /*!40000 ALTER TABLE `maquina_combustivel` DISABLE KEYS */;
-INSERT INTO `maquina_combustivel` VALUES (1,1,'Diesel S10'),(2,2,'Diesel S500'),(3,3,'Diesel S10'),(4,4,'Diesel S10'),(5,5,'Diesel S500'),(6,6,'Diesel S10');
 /*!40000 ALTER TABLE `maquina_combustivel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -240,7 +239,7 @@ CREATE TABLE `notificacao` (
   CONSTRAINT `notificacao_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
   CONSTRAINT `notificacao_ibfk_2` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE SET NULL,
   CONSTRAINT `notificacao_ibfk_3` FOREIGN KEY (`id_ordem_manutencao`) REFERENCES `ordem_manutencao` (`id_ordem`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -249,7 +248,7 @@ CREATE TABLE `notificacao` (
 
 LOCK TABLES `notificacao` WRITE;
 /*!40000 ALTER TABLE `notificacao` DISABLE KEYS */;
-INSERT INTO `notificacao` VALUES (1,1,1,NULL,'alerta_preventivo','O Trator John Deere está se aproximando do limite de quilometragem para a próxima revisão (faltam 50km).',0,'2026-06-23 13:45:33'),(2,1,2,2,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira Case IH.',0,'2026-06-23 13:45:33'),(3,2,3,3,'anomalia','Falha crítica registrada no Pulverizador Jacto. Máquina marcada como Inativa/Em Manutenção.',1,'2026-06-23 13:45:33'),(4,6,5,5,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira New Holland.',0,'2026-06-24 11:05:00'),(5,4,4,NULL,'alerta_preventivo','O Trator Massey Ferguson está se aproximando do limite de quilometragem para a próxima revisão (faltam 30km).',0,'2026-06-24 11:10:00'),(6,5,6,6,'anomalia','Pulverizador Stara apresenta risco elevado devido à verificação pendente do sistema hidráulico.',0,'2026-06-24 11:15:00'),(7,1,1,NULL,'alerta_preventivo','Trator John Deere próximo da troca de óleo. Hodômetro: 1250.50',0,'2026-06-20 08:00:00'),(8,1,2,NULL,'anomalia','Anomalia de consumo detectada na Colheitadeira Case IH. Consumo atual: 42.00, Média: 35.00',0,'2026-06-20 10:30:00'),(9,1,1,NULL,'alerta_preventivo','Trator John Deere próximo da inspeção. Hodômetro: 1250.50',0,'2026-06-21 07:00:00'),(10,1,4,NULL,'alerta_preventivo','Trator MF 4275 próximo da troca de óleo. Hodômetro: 890.30',0,'2026-06-22 09:00:00'),(11,1,3,NULL,'anomalia','Anomalia de consumo detectada no Pulverizador Jacto. Consumo atual: 25.00, Média: 18.20',0,'2026-06-22 14:00:00'),(12,1,5,NULL,'anomalia','Anomalia de consumo detectada na Colheitadeira NH. Consumo atual: 50.00, Média: 40.50',0,'2026-06-23 11:00:00'),(13,1,6,NULL,'alerta_preventivo','Pulverizador Stara próximo da inspeção. Hodômetro: 2100.60',0,'2026-06-24 08:00:00'),(14,1,2,NULL,'alerta_preventivo','Colheitadeira Case IH próxima da troca de óleo. Hodômetro: 450.00',0,'2026-06-24 15:00:00'),(15,1,1,NULL,'anomalia','Anomalia de consumo detectada no Trator John Deere. Consumo atual: 18.00, Média: 12.50',0,'2026-07-01 09:00:00'),(16,1,3,NULL,'alerta_preventivo','Pulverizador Jacto próximo da troca de óleo. Hodômetro: 3200.80',0,'2026-07-05 10:00:00'),(17,1,4,NULL,'anomalia','Anomalia de consumo detectada no Trator MF 4275. Consumo atual: 20.00, Média: 13.80',0,'2026-07-10 11:00:00'),(18,1,5,NULL,'alerta_preventivo','Colheitadeira NH próxima da inspeção. Hodômetro: 120.00',0,'2026-07-15 08:30:00');
+INSERT INTO `notificacao` VALUES (1,1,1,NULL,'alerta_preventivo','O Trator John Deere está se aproximando do limite de quilometragem para a próxima revisão (faltam 50km).',0,'2026-06-23 13:45:33'),(2,1,2,2,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira Case IH.',0,'2026-06-23 13:45:33'),(3,2,3,3,'anomalia','Falha crítica registrada no Pulverizador Jacto. Máquina marcada como Inativa/Em Manutenção.',1,'2026-06-23 13:45:33'),(4,6,5,5,'ordem_pendente','Nova Ordem de Manutenção pendente de aprovação para a Colheitadeira New Holland.',0,'2026-06-24 11:05:00'),(5,4,4,NULL,'alerta_preventivo','O Trator Massey Ferguson está se aproximando do limite de quilometragem para a próxima revisão (faltam 30km).',0,'2026-06-24 11:10:00'),(6,5,6,6,'anomalia','Pulverizador Stara apresenta risco elevado devido à verificação pendente do sistema hidráulico.',0,'2026-06-24 11:15:00'),(7,1,1,NULL,'alerta_preventivo','Trator John Deere próximo da troca de óleo. Hodômetro: 1250.50',0,'2026-06-20 08:00:00'),(8,1,2,NULL,'anomalia','Anomalia de consumo detectada na Colheitadeira Case IH. Consumo atual: 42.00, Média: 35.00',0,'2026-06-20 10:30:00'),(9,1,1,NULL,'alerta_preventivo','Trator John Deere próximo da inspeção. Hodômetro: 1250.50',0,'2026-06-21 07:00:00'),(10,1,4,NULL,'alerta_preventivo','Trator MF 4275 próximo da troca de óleo. Hodômetro: 890.30',0,'2026-06-22 09:00:00'),(11,1,3,NULL,'anomalia','Anomalia de consumo detectada no Pulverizador Jacto. Consumo atual: 25.00, Média: 18.20',0,'2026-06-22 14:00:00'),(12,1,5,NULL,'anomalia','Anomalia de consumo detectada na Colheitadeira NH. Consumo atual: 50.00, Média: 40.50',0,'2026-06-23 11:00:00'),(13,1,6,NULL,'alerta_preventivo','Pulverizador Stara próximo da inspeção. Hodômetro: 2100.60',0,'2026-06-24 08:00:00'),(14,1,2,NULL,'alerta_preventivo','Colheitadeira Case IH próxima da troca de óleo. Hodômetro: 450.00',0,'2026-06-24 15:00:00'),(15,1,1,NULL,'anomalia','Anomalia de consumo detectada no Trator John Deere. Consumo atual: 18.00, Média: 12.50',0,'2026-07-01 09:00:00'),(16,1,3,NULL,'alerta_preventivo','Pulverizador Jacto próximo da troca de óleo. Hodômetro: 3200.80',0,'2026-07-05 10:00:00'),(17,1,4,NULL,'anomalia','Anomalia de consumo detectada no Trator MF 4275. Consumo atual: 20.00, Média: 13.80',0,'2026-07-10 11:00:00'),(18,1,5,NULL,'alerta_preventivo','Colheitadeira NH próxima da inspeção. Hodômetro: 120.00',0,'2026-07-15 08:30:00'),(19,4,NULL,5,'ordem_aprovada','A ordem de manutenção para a máquina Colheitadeira NH CR6.90 foi encerrada.',0,'2026-07-31 17:09:41'),(20,2,NULL,3,'ordem_aprovada','A ordem de manutenção para a máquina Pulverizador Jacto 3030 foi encerrada.',0,'2026-07-31 17:12:15');
 /*!40000 ALTER TABLE `notificacao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -285,7 +284,7 @@ CREATE TABLE `ordem_manutencao` (
 
 LOCK TABLES `ordem_manutencao` WRITE;
 /*!40000 ALTER TABLE `ordem_manutencao` DISABLE KEYS */;
-INSERT INTO `ordem_manutencao` VALUES (1,1,2,'Encerrada','Baixa','Troca de óleo do motor e filtros.','Serviço realizado pela oficina parceira.','2026-05-10 10:00:00','2026-05-11 15:00:00',0),(2,2,1,'Aguardando Aprovação','Media','Revisão das correias e rolamentos antes da safra.',NULL,'2026-06-23 09:00:00',NULL,0),(3,3,2,'Ativa','Alta','Substituição da bomba de pulverização estourada.',NULL,'2026-06-22 09:30:00',NULL,0),(4,4,6,'Encerrada','Baixa','Troca de filtro de ar e verificação de pneus.','Manutenção concluída sem intercorrências.','2026-06-15 09:00:00','2026-06-15 14:00:00',0),(5,5,4,'Ativa','Media','Ajuste do sistema de trilha e limpeza dos sensores.',NULL,'2026-06-24 10:00:00',NULL,0),(6,6,5,'Aguardando Aprovação','Alta','Verificação do sistema hidráulico do pulverizador.',NULL,'2026-06-24 11:00:00',NULL,0);
+INSERT INTO `ordem_manutencao` VALUES (1,1,2,'Encerrada','Baixa','Troca de óleo do motor e filtros.','Serviço realizado pela oficina parceira.','2026-05-10 10:00:00','2026-05-11 15:00:00',0),(2,2,1,'Aguardando Aprovação','Media','Revisão das correias e rolamentos antes da safra.',NULL,'2026-06-23 09:00:00',NULL,0),(3,3,2,'Encerrada','Alta','Substituição da bomba de pulverização estourada.','serviço realizado\r\n','2026-06-22 09:30:00','2026-07-31 17:12:15',0),(4,4,6,'Encerrada','Baixa','Troca de filtro de ar e verificação de pneus.','Manutenção concluída sem intercorrências.','2026-06-15 09:00:00','2026-06-15 14:00:00',0),(5,5,4,'Encerrada','Media','Ajuste do sistema de trilha e limpeza dos sensores.','serviço realizado','2026-06-24 10:00:00','2026-07-31 17:09:41',0),(6,6,5,'Aguardando Aprovação','Alta','Verificação do sistema hidráulico do pulverizador.',NULL,'2026-06-24 11:00:00',NULL,0);
 /*!40000 ALTER TABLE `ordem_manutencao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -312,7 +311,7 @@ CREATE TABLE `registro_operacao` (
   KEY `id_usuario` (`id_usuario`),
   CONSTRAINT `registro_operacao_ibfk_1` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE RESTRICT,
   CONSTRAINT `registro_operacao_ibfk_2` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,7 +320,7 @@ CREATE TABLE `registro_operacao` (
 
 LOCK TABLES `registro_operacao` WRITE;
 /*!40000 ALTER TABLE `registro_operacao` DISABLE KEYS */;
-INSERT INTO `registro_operacao` VALUES (1,1,2,'2026-06-20 07:00:00','2026-06-20 17:00:00',1240.50,1250.50,NULL,'Gradeação do talhão 4.',NULL),(2,2,3,'2026-06-21 06:00:00','2026-06-21 18:00:00',420.00,450.00,15000.00,'Colheita de soja no talhão 2.',12500.00),(3,3,2,'2026-06-22 08:00:00',NULL,3200.80,NULL,NULL,'Operação interrompida por falha na bomba de pulverização.',NULL),(4,4,5,'2026-06-24 07:00:00','2026-06-24 16:00:00',870.00,890.30,NULL,'Preparo de solo no talhão 6.',NULL),(5,5,4,'2026-06-24 06:30:00',NULL,100.00,NULL,NULL,'Colheita de milho no talhão 3, em andamento.',NULL),(6,6,6,'2026-06-24 08:00:00','2026-06-24 12:00:00',2080.00,2100.60,NULL,'Aplicação de defensivo no talhão 5.',NULL);
+INSERT INTO `registro_operacao` VALUES (1,1,2,'2026-06-20 07:00:00','2026-06-20 17:00:00',1240.50,1250.50,NULL,'Gradeação do talhão 4.',NULL),(2,2,3,'2026-06-21 06:00:00','2026-06-21 18:00:00',420.00,450.00,15000.00,'Colheita de soja no talhão 2.',12500.00),(3,3,2,'2026-06-22 08:00:00','2026-06-22 17:00:00',3200.80,3210.00,NULL,'Encerrado manualmente - correção de dados de seed',NULL),(4,4,5,'2026-06-24 07:00:00','2026-06-24 16:00:00',870.00,890.30,NULL,'Preparo de solo no talhão 6.',NULL),(5,5,4,'2026-06-24 06:30:00','2026-07-31 16:51:07',100.00,130.00,NULL,NULL,1300.00),(6,6,6,'2026-06-24 08:00:00','2026-06-24 12:00:00',2080.00,2100.60,NULL,'Aplicação de defensivo no talhão 5.',NULL),(7,4,1,'2026-07-31 17:24:34','2026-08-03 15:30:38',890.30,895.00,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `registro_operacao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -373,7 +372,7 @@ CREATE TABLE `telemetria_maquina` (
   PRIMARY KEY (`id`),
   KEY `fk_telemetria_maquina` (`id_maquina`),
   CONSTRAINT `fk_telemetria_maquina` FOREIGN KEY (`id_maquina`) REFERENCES `maquina` (`id_maquina`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -382,7 +381,7 @@ CREATE TABLE `telemetria_maquina` (
 
 LOCK TABLES `telemetria_maquina` WRITE;
 /*!40000 ALTER TABLE `telemetria_maquina` DISABLE KEYS */;
-INSERT INTO `telemetria_maquina` VALUES (1,5,7.21,45.92,-12.95197156,-55.93226858,'2026-07-30 22:14:02');
+INSERT INTO `telemetria_maquina` VALUES (1,5,4.76,45.14,-12.95818634,-55.92563373,'2026-07-31 16:51:00'),(2,4,14.30,13.78,-12.95839471,-55.91923478,'2026-08-03 15:30:36');
 /*!40000 ALTER TABLE `telemetria_maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -414,7 +413,7 @@ CREATE TABLE `usuario` (
 
 LOCK TABLES `usuario` WRITE;
 /*!40000 ALTER TABLE `usuario` DISABLE KEYS */;
-INSERT INTO `usuario` VALUES (1,'João Batista','joao.batista@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,0,NULL,'2026-06-23 13:45:21'),(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-23 13:45:21'),(3,'Marcos Silva','marcos.silva@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-23 13:45:21'),(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,1,NULL,'2026-06-24 08:10:00'),(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,NULL,'2026-06-24 08:15:00'),(6,'Patrícia Souza','patricia.souza@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,1,NULL,'2026-06-24 08:20:00'),(7,'Roberto Lima','roberto.lima@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','SOCIO',1,1,NULL,'2026-07-16 10:00:00');
+INSERT INTO `usuario` VALUES (1,'João Batista','joao.batista@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','PROPRIETARIO',1,0,'6f16d356-d842-4992-ab96-fc02fa7f3a4b_joao.png','2026-06-23 00:00:00'),(2,'Carlos Mendes','carlos.mendes@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,'8d1b85a8-a8e4-403f-824e-ca9df204f498_carlos.jpg','2026-06-23 00:00:00'),(3,'Marcos Silva','marcos.silva@fazenda.com.br','$2a$10$sERLal.GmDv1op88qKYAIenoycMQk5xcuipmwi48OJobAEnNeggX2','OPERADOR',1,0,'78bebcdd-3724-40ae-9078-c64363ba369c_marcos.jpg','2026-06-23 00:00:00'),(4,'Fernanda Rocha','fernanda.rocha@fazenda.com.br','$2a$10$XZPe87ZgL8eY28yEu0dEE.54/owZDBqnarBP/Mw1p5I5XzYyzBshO','OPERADOR',1,0,'07610657-f37c-4937-a743-23cfc96ecc28_fernanda.png','2026-06-24 00:00:00'),(5,'Ricardo Alves','ricardo.alves@fazenda.com.br','$2a$10$rrPKOP/6TnNqBCJ9KAJetu/VwQvwOeKM8mkrLnydjq9q7COPJ3/Y2','OPERADOR',1,0,'1bbc2abb-7d0d-4220-b169-789d645af3a9_ricardo.png','2026-06-24 00:00:00'),(6,'Patrícia Souza','patricia.souza@fazenda.com.br','$2a$10$b7FTAM5idt9Cg6AI1WeCkutYG8P5.uSnOwbbduIbZ5gvw8KkLu9wG','PROPRIETARIO',1,0,'47f6ae57-08fd-41b0-8296-477c74b8e884_patricia.png','2026-06-24 00:00:00'),(7,'Roberto Lima','roberto.lima@fazenda.com.br','$2a$10$765YAXKjBIARkU2SsJUBFONbQlsYJYdFRVrhdZU4HXBlaON34SbqC','SOCIO',1,0,'5b0fa8c5-6afe-4273-ad62-e8dace2c757c_roberto.png','2026-07-16 00:00:00');
 /*!40000 ALTER TABLE `usuario` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -441,7 +440,7 @@ CREATE TABLE `usuario_maquina` (
 
 LOCK TABLES `usuario_maquina` WRITE;
 /*!40000 ALTER TABLE `usuario_maquina` DISABLE KEYS */;
-INSERT INTO `usuario_maquina` VALUES (2,1),(3,2),(2,3),(4,4),(4,5),(6,6);
+INSERT INTO `usuario_maquina` VALUES (2,1),(3,2),(2,3),(2,4),(4,4),(4,5),(6,6);
 /*!40000 ALTER TABLE `usuario_maquina` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -454,4 +453,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-07-30 22:14:03
+-- Dump completed on 2026-08-05 15:05:36
