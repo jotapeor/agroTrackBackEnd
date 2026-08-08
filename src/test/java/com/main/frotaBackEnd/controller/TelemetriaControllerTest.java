@@ -66,7 +66,6 @@ class TelemetriaControllerTest {
         when(maquinaRepository.buscarEmOperacao()).thenReturn(Collections.emptyList());
         when(registroOperacaoRepository.buscarOperacoesAtivas(anyLong())).thenReturn(Collections.emptyList());
         when(telemetriaMaquinaRepository.findTopByMaquinaIdOrderByDataAtualizacaoDesc(anyLong())).thenReturn(Optional.empty());
-        // userRepository is real (H2); verificaVinculo returns false naturally when no link exists
     }
 
     private String gerarToken(String nome, String email, String perfil) {

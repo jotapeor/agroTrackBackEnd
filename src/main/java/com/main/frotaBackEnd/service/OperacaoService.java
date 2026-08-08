@@ -107,7 +107,7 @@ public class OperacaoService {
             if ("Alto".equals(maquina.getNivelRisco())) {
                 if (!maquina.isAutorizadaOperacaoRisco()) {
                     List<Usuario> proprietarios = userRepository.findAll().stream()
-                            .filter(u -> "PROPRIETARIO".equals(u.getPerfil())).toList();
+                            .filter(u -> "PROPRIETARIO".equals(u.getPerfil()) || "SOCIO".equals(u.getPerfil())).toList();
                     LocalDateTime limite = LocalDateTime.now().minusHours(24);
                     for (Usuario p : proprietarios) {
                         List<Notificacao> recentes = notificacaoRepository.buscarPorMaquinaId(maquina.getId());
