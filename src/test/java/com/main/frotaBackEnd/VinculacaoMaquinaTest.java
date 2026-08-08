@@ -39,8 +39,6 @@ public class VinculacaoMaquinaTest {
         solicitanteProprietario.setId_usuario(1L);
     }
 
-    // ── Teste 1: vincular máquinas → usuario_maquina reflete exatamente a lista ──
-
     @Test
     void testVincularMaquinasRefleteLista() {
         Usuario colaborador = new Usuario();
@@ -85,8 +83,6 @@ public class VinculacaoMaquinaTest {
                 "Após desvincular todas, a lista de máquinas deve estar vazia");
     }
 
-    // ── Teste 2: operador só vê máquinas vinculadas a ele ──
-
     @Test
     void testBuscarPorUsuarioIdRetornaSoMaquinasVinculadas() {
         Maquina m1 = maquinaComId(1L, "Disponivel");
@@ -107,14 +103,10 @@ public class VinculacaoMaquinaTest {
                 "Proprietário deve ver todas as 3 máquinas");
     }
 
-    // ── Teste 3: lista de colaboradores não inclui o próprio usuário logado ──
-    //    Verifica o filtro corrigido (Long vs Integer do Jackson)
-
     @Test
     void testFiltroColaboradoresExcluiProprioUsuario_LongVsInteger() {
-        // Jackson desserializa IDs pequenos como Integer ao usar List.class sem tipo genérico
         Map<String, Object> proprietario = new HashMap<>();
-        proprietario.put("id_usuario", Integer.valueOf(1)); // Integer — comportamento real do Jackson
+        proprietario.put("id_usuario", Integer.valueOf(1));
         proprietario.put("nome", "João Batista");
 
         Map<String, Object> colaborador = new HashMap<>();
@@ -122,16 +114,14 @@ public class VinculacaoMaquinaTest {
         colaborador.put("nome", "Carlos Mendes");
 
         List<Map<String, Object>> todos = List.of(proprietario, colaborador);
-        Long meuId = 1L; // session.getAttribute("userId") retorna Long
+        Long meuId = 1L;
 
-        // Filtro ANTIGO — Long.equals(Integer) sempre false → não filtra ninguém
         List<Map<String, Object>> filtroAntigo = todos.stream()
                 .filter(c -> !meuId.equals(c.get("id_usuario")))
                 .toList();
         assertEquals(2, filtroAntigo.size(),
                 "Bug confirmado: filtro antigo com Long.equals(Integer) não remove o próprio usuário");
 
-        // Filtro CORRIGIDO — compara via Number.longValue()
         List<Map<String, Object>> filtroCorrigido = todos.stream()
                 .filter(c -> {
                     Object idObj = c.get("id_usuario");
@@ -143,8 +133,6 @@ public class VinculacaoMaquinaTest {
                 "Filtro corrigido deve remover o próprio usuário da lista");
         assertEquals("Carlos Mendes", filtroCorrigido.get(0).get("nome"));
     }
-
-    // ── Teste 4: desvincular máquina "Em Operacao" é bloqueado com mensagem clara ──
 
     @Test
     void testDesvincularBloqueadaQuandoMaquinaEmOperacao() {
@@ -181,13 +169,8 @@ public class VinculacaoMaquinaTest {
                 "Mensagem deve explicar o motivo do bloqueio: " + ex.getReason());
     }
 
-    // ── Teste 5: registro órfão (data_fim=null, mas máquina Em Manutencao) não bloqueia ──
-    //    Simula o bug do Pulverizador Jacto 3030 / Carlos Mendes após a correção da query
-
     @Test
     void testDesvincularNaoBloqueadaComRegistroOrfao() {
-        // Cenário real: id_operacao=3, id_maquina=3, data_fim=NULL, mas maquina.status='Em Manutencao'
-        // Após a correção do JPQL (and r.maquina.status = 'Em Operacao'), a query retorna lista vazia
         Maquina jacto3030 = maquinaComId(3L, "Em Manutencao");
         jacto3030.setNome("Pulverizador Jacto 3030");
 
@@ -197,7 +180,6 @@ public class VinculacaoMaquinaTest {
         carlosMendes.setMaquinas(new ArrayList<>(List.of(jacto3030)));
 
         when(userRepository.findById(2L)).thenReturn(Optional.of(carlosMendes));
-        // Query corrigida retorna vazio: máquina não está "Em Operacao"
         when(registroOperacaoRepository
                 .buscarOperacoesAbertasPorMaquinasEUsuario(List.of(3L), 2L))
                 .thenReturn(List.of());
@@ -210,8 +192,6 @@ public class VinculacaoMaquinaTest {
         assertTrue(carlosMendes.getMaquinas().isEmpty(),
                 "Carlos Mendes deve ser desvinculado do Pulverizador Jacto 3030 com sucesso");
     }
-
-    // ── Utilitário ──
 
     private Maquina maquinaComId(Long id, String status) {
         Maquina m = new Maquina();

@@ -172,7 +172,7 @@ public class ManutencaoService {
 
     private void gerarNotificacaoProprietarioComOrdem(OrdemManutencao ordem, String tipo, String mensagem) {
         List<Usuario> proprietarios = userRepository.findAll().stream()
-                .filter(u -> "PROPRIETARIO".equals(u.getPerfil()))
+                .filter(u -> "PROPRIETARIO".equals(u.getPerfil()) || "SOCIO".equals(u.getPerfil()))
                 .toList();
 
         for (Usuario p : proprietarios) {

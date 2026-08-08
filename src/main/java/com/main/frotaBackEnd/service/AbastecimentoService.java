@@ -144,7 +144,7 @@ public class AbastecimentoService {
 
     private void gerarNotificacaoProprietario(String tipo, String mensagem, Maquina maquina) {
         List<Usuario> proprietarios = userRepository.findAll().stream()
-                .filter(u -> "PROPRIETARIO".equals(u.getPerfil()))
+                .filter(u -> "PROPRIETARIO".equals(u.getPerfil()) || "SOCIO".equals(u.getPerfil()))
                 .toList();
 
         LocalDateTime limite = LocalDateTime.now().minusHours(24);
